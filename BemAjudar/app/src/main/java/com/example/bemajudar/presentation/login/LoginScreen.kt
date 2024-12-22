@@ -42,11 +42,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bemajudar.R
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onLoginClick: (String, String) -> Unit, // Navegação após login bem-sucedido
+    onLoginSuccess: (String) -> Unit, // Navegação com base no tipo de user
     onCreateAccountClick: () -> Unit // Navegação para criar conta
 ) {
     val primaryColor = Color(0xFF025997)
@@ -60,6 +61,7 @@ fun LoginScreen(
 
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
 
     Column(
         modifier = Modifier
@@ -157,8 +159,30 @@ fun LoginScreen(
                     auth.signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                Toast.makeText(context, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show()
-                                onLoginClick(email, password) // Navega para outra tela
+                                val uid = auth.currentUser?.uid
+                                if (uid != null) {
+                                    // Busca o tipo de user no Firestore
+                                    db.collection("users").document(uid).get()
+                                        .addOnSuccessListener { document ->
+                                            if (document.exists()) {
+                                                val userType = document.getString("userType") ?: "Voluntário"
+                                                onLoginSuccess(userType) // Navega com base no tipo
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    "User não encontrado!",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }
+                                        .addOnFailureListener {
+                                            Toast.makeText(
+                                                context,
+                                                "Erro ao buscar User: ${it.message}",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                }
                             } else {
                                 Toast.makeText(
                                     context,
@@ -181,6 +205,42 @@ fun LoginScreen(
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Texto para redefinir passe
+        TextButton(
+            onClick = {
+                if (email.isNotEmpty()) {
+                    auth.sendPasswordResetEmail(email)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                Toast.makeText(
+                                    context,
+                                    "Email para redefinição enviado para $email!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Erro: ${task.exception?.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                } else {
+                    Toast.makeText(context, "Por favor, insira o email para redefinir a palavra-passe.", Toast.LENGTH_SHORT).show()
+                }
+            },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(
+                text = "Esqueci-me da palavra passe",
+                color = primaryColor,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
             )
         }
 

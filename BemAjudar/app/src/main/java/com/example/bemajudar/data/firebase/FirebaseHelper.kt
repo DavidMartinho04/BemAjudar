@@ -42,4 +42,4 @@ fun registerUser(
                 onFailure(task.exception ?: Exception("Erro desconhecido ao criar utilizador."))
             }
         }
-}
+    }

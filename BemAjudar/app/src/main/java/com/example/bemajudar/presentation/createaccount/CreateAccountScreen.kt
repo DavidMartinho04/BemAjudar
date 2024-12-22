@@ -117,12 +117,11 @@ fun CreateAccountScreen(
 
         // Indicadores de progresso
         ProgressIndicators(
-            currentStep = 1, // Atual etapa
-            totalSteps = 2,  // Total de etapas
-            activeColor = primaryColor, // Cor ativa
-            inactiveColor = textFieldBackground // Cor inativa
+            currentStep = 1, // Primeira etapa
+            totalSteps = 2,  // Total de etapas é fixado em 2
+            activeColor = primaryColor, // Cor da etapa atual
+            inactiveColor = textFieldBackground // Cor das etapas inativas
         )
-
         Spacer(modifier = Modifier.height(16.dp))
 
         // Foto de perfil

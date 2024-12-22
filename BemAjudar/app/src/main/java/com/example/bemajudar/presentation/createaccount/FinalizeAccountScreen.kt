@@ -81,12 +81,11 @@ fun FinalizeAccountScreen(
 
         // Indicadores de progresso
         ProgressIndicators(
-            currentStep = 2,
-            totalSteps = 2,
-            activeColor = primaryColor,
-            inactiveColor = textFieldBackground
+            currentStep = 2, // Segunda etapa
+            totalSteps = 2,  // Total de etapas é fixado em 2
+            activeColor = primaryColor, // Cor da etapa atual
+            inactiveColor = textFieldBackground // Cor das etapas inativas
         )
-
         Spacer(modifier = Modifier.height(35.dp))
 
         // Campo Morada
@@ -105,7 +104,6 @@ fun FinalizeAccountScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Campo Código Postal
         // Campo Código Postal
         OutlinedTextField(
             value = postalCode,
