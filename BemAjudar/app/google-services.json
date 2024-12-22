@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "241700376238",
+    "project_id": "bemajudar-f1554",
+    "storage_bucket": "bemajudar-f1554.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:241700376238:android:ce8a3db5531fa6194d673f",
+        "android_client_info": {
+          "package_name": "com.example.bemajudar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuWWZBSfKJ5bhySSxZKEeUG_kFxNpcq_Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
