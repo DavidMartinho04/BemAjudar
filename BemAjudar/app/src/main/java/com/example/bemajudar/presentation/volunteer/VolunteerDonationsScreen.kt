@@ -30,48 +30,48 @@ fun DonationsAreaVolunteerScreen() {
     ) {
         Text(
             text = "Área Doações",
-            fontSize = 30.sp, // Título maior
+            fontSize = 30.sp, // Tamanho grande para o título principal
             fontWeight = FontWeight.Bold,
             color = Color.Black,
             modifier = Modifier.align(Alignment.Start)
         )
 
-        Spacer(modifier = Modifier.height(32.dp)) // Espaçamento maior abaixo do título
+        Spacer(modifier = Modifier.height(32.dp)) // Espaçamento entre o título e os botões
 
+        // Lista de opções da área de doações
         listOf(
-            "Registar Visitante" to "Registar um novo visitante",
-            "Gerir Eventos" to "Verificar os eventos que irão decorrer",
-            "Gerir Visitantes" to "Verificar os visitantes do sistema",
-            "Criar Visita" to "Registar uma nova visita na loja social",
-            "Consultar Visitas" to "Listagem de visitas diárias na loja"
+            "Registar Levantamento" to "Registar um novo levantamento",
+            "Consultar Levantamentos" to "Listagem de levantamentos efetuados",
+            "Gerir Doações" to "Verificar as doações do inventário",
+            "Gerir Itens" to "Verificar os itens do inventário"
         ).forEach { (title, subtitle) ->
             Button(
-                onClick = { /* Navegação futura */ },
+                onClick = { /* Aqui será implementada a navegação ou funcionalidade correspondente */ },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp) // Altura maior para os botões
-                    .padding(vertical = 12.dp), // Espaçamento entre botões
-                shape = RoundedCornerShape(16.dp), // Cantos mais arredondados
+                    .height(100.dp) // Altura personalizada para os botões
+                    .padding(vertical = 12.dp), // Espaçamento vertical entre os botões
+                shape = RoundedCornerShape(16.dp), // Cantos arredondados nos botões
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                border = BorderStroke(2.dp, Color(0xFF025997)) // Borda mais espessa
+                border = BorderStroke(2.dp, Color(0xFF025997)) // Define uma borda azul ao redor dos botões
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 16.dp), // Alinha os textos à esquerda
+                        .padding(start = 16.dp), // Alinha os textos à esquerda dentro do botão
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
                         text = title,
-                        color = Color(0xFF025997),
+                        color = Color(0xFF025997), // Cor azul para o título do botão
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp, // Tamanho maior para o título
+                        fontSize = 20.sp, // Tamanho maior para o título do botão
                         modifier = Modifier.padding(bottom = 4.dp) // Espaçamento entre título e subtítulo
                     )
                     Text(
                         text = subtitle,
-                        color = Color.Gray,
-                        fontSize = 16.sp // Tamanho maior para o subtítulo
+                        color = Color.Gray, // Cor cinza para o subtítulo
+                        fontSize = 16.sp // Tamanho menor para o subtítulo
                     )
                 }
             }

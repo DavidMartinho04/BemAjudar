@@ -22,56 +22,61 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun DonationsAreaAdminScreen() {
+    // Estrutura principal da interface para a área de doações do administrador
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxSize() // Preenche todo o espaço disponível
+            .padding(16.dp), // Margem de 16dp em toda a volta
+        horizontalAlignment = Alignment.CenterHorizontally // Alinha os itens horizontalmente ao centro
     ) {
+        // Título principal
         Text(
-            text = "Área Doações",
-            fontSize = 30.sp, // Título maior
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            modifier = Modifier.align(Alignment.Start)
+            text = "Área Doações", // Texto do título
+            fontSize = 30.sp, // Tamanho grande para o título
+            fontWeight = FontWeight.Bold, // Texto em negrito
+            color = Color.Black, // Cor preta
+            modifier = Modifier.align(Alignment.Start) // Alinha o título ao início (esquerda)
         )
 
-        Spacer(modifier = Modifier.height(32.dp)) // Espaçamento maior abaixo do título
+        Spacer(modifier = Modifier.height(32.dp)) // Espaçamento entre o título e o próximo elemento
 
+        // Lista de opções com botões
         listOf(
-            "Registar Visitante" to "Registar um novo visitante",
-            "Gerir Eventos" to "Verificar os eventos que irão decorrer",
-            "Gerir Visitantes" to "Verificar os visitantes do sistema",
-            "Criar Visita" to "Registar uma nova visita na loja social",
-            "Consultar Visitas" to "Listagem de visitas diárias na loja"
-        ).forEach { (title, subtitle) ->
+            "Registar Doação" to "Registar uma nova doação", // Título e descrição do botão
+            "Gerir Doações" to "Verificar as doações do inventário",
+            "Gerir Itens" to "Verificar os itens do inventário",
+            "Consultar Levantamentos" to "Listagem de levantamentos efetuados"
+        ).forEach { (title, subtitle) -> // Itera por cada par (título e subtítulo) da lista
             Button(
-                onClick = { /* Navegação futura */ },
+                onClick = { /* Navegação futura */ }, // Ação a ser executada quando o botão for clicado
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp) // Altura maior para os botões
-                    .padding(vertical = 12.dp), // Espaçamento entre botões
-                shape = RoundedCornerShape(16.dp), // Cantos mais arredondados
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                border = BorderStroke(2.dp, Color(0xFF025997)) // Borda mais espessa
+                    .fillMaxWidth() // Botão ocupa toda a largura disponível
+                    .height(100.dp) // Altura do botão
+                    .padding(vertical = 12.dp), // Espaçamento vertical entre os botões
+                shape = RoundedCornerShape(16.dp), // Cantos arredondados com raio de 16dp
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Cor de fundo branca
+                border = BorderStroke(2.dp, Color(0xFF025997)) // Borda com espessura de 2dp e cor azul
             ) {
+                // Conteúdo do botão
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp), // Alinha os textos à esquerda
-                    verticalArrangement = Arrangement.Center
+                        .fillMaxWidth() // Preenche a largura do botão
+                        .padding(start = 16.dp), // Margem interna no início (esquerda) do botão
+                    verticalArrangement = Arrangement.Center // Alinha verticalmente ao centro
                 ) {
+                    // Título do botão
                     Text(
-                        text = title,
-                        color = Color(0xFF025997),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp, // Tamanho maior para o título
-                        modifier = Modifier.padding(bottom = 4.dp) // Espaçamento entre título e subtítulo
+                        text = title, // Texto do título
+                        color = Color(0xFF025997), // Cor azul
+                        fontWeight = FontWeight.Bold, // Texto em negrito
+                        fontSize = 20.sp, // Tamanho grande do texto
+                        modifier = Modifier.padding(bottom = 4.dp) // Espaçamento abaixo do título
                     )
+                    // Subtítulo do botão
                     Text(
-                        text = subtitle,
-                        color = Color.Gray,
-                        fontSize = 16.sp // Tamanho maior para o subtítulo
+                        text = subtitle, // Texto do subtítulo
+                        color = Color.Gray, // Cor cinzenta
+                        fontSize = 16.sp // Tamanho médio do texto
                     )
                 }
             }

@@ -1,33 +1,32 @@
 package com.example.bemajudar.presentation.viewmodels
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 
 class UserViewModel : ViewModel() {
     // Dados do primeiro formulário
-    var photoUri: Uri? = null
-    var name: String = ""
-    var birthDate: String = ""
-    var phone: String = ""
-    var email: String = ""
-    var password: String = ""
+    var photoUrl: String? = null // URL da imagem de perfil do utilizador
+    var name: String = "" // Nome do utilizador
+    var birthDate: String = "" // Data de nascimento do utilizador
+    var phone: String = "" // Número de telemóvel do utilizador
+    var email: String = "" // Endereço de email do utilizador
+    var password: String = "" // Palavra-passe do utilizador
 
     // Dados do segundo formulário
-    var address: String = ""
-    var postalCode: String = ""
-    var gender: String = "Masculino" // Valor padrão
-    var userType: String = "Gestor" // Valor padrão
+    var address: String = "" // Morada do utilizador
+    var postalCode: String = "" // Código postal do utilizador
+    var gender: String = "Masculino" // Género do utilizador, com valor padrão "Masculino"
+    var userType: String = "Gestor" // Tipo de utilizador, com valor padrão "Gestor"
 
     // Função para atualizar os dados do primeiro formulário
     fun updateUserData(
-        photoUri: Uri?,
-        name: String,
-        birthDate: String,
-        phone: String,
-        email: String,
-        password: String
+        photoUrl: String?, // URL da imagem de perfil
+        name: String, // Nome do utilizador
+        birthDate: String, // Data de nascimento
+        phone: String, // Número de telemóvel
+        email: String, // Endereço de email
+        password: String // Palavra-passe
     ) {
-        this.photoUri = photoUri
+        this.photoUrl = photoUrl
         this.name = name
         this.birthDate = birthDate
         this.phone = phone
@@ -37,10 +36,10 @@ class UserViewModel : ViewModel() {
 
     // Função para atualizar os dados do segundo formulário
     fun updateFinalizeData(
-        address: String,
-        postalCode: String,
-        gender: String,
-        userType: String
+        address: String, // Morada do utilizador
+        postalCode: String, // Código postal
+        gender: String, // Género do utilizador
+        userType: String // Tipo de utilizador
     ) {
         this.address = address
         this.postalCode = postalCode

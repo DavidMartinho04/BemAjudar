@@ -1,5 +1,6 @@
 package com.example.bemajudar.presentation.createaccount
 
+// Importações necessárias para os componentes e funções do Compose e Firebase
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,20 +48,22 @@ import com.example.bemajudar.ui.components.ProgressIndicators
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FinalizeAccountScreen(
-    onCreateAccountClick: () -> Unit,
-    userViewModel: UserViewModel = viewModel()
+    onCreateAccountClick: () -> Unit, // Callback para navegação após criação de conta
+    userViewModel: UserViewModel = viewModel() // Injeta o ViewModel para gestão de dados do utilizador
 ) {
+    // Cores definidas para uso na interface
     val primaryColor = Color(0xFF625BFF)
     val textFieldBackground = Color(0xFFF3F3F3)
     val secondaryColor = Color(0xFF6F6F6F)
 
-    // Estados locais para os campos desta tela
+    // Estados locais para os valores do formulário
     var address by remember { mutableStateOf("") }
     var postalCode by remember { mutableStateOf("") }
-    var gender by remember { mutableStateOf("Masculino") }
-    var userType by remember { mutableStateOf("Gestor") }
-    var expanded by remember { mutableStateOf(false) }
+    var gender by remember { mutableStateOf("Masculino") } // Género inicial padrão
+    var userType by remember { mutableStateOf("Gestor") } // Tipo de utilizador inicial padrão
+    var expanded by remember { mutableStateOf(false) } // Controla se o menu dropdown está expandido
 
+    // Contexto para exibir Toasts
     val context = LocalContext.current
 
     Column(
@@ -68,6 +71,7 @@ fun FinalizeAccountScreen(
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Título do ecrã
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = "Quase Lá!",
@@ -79,16 +83,16 @@ fun FinalizeAccountScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Indicadores de progresso
+        // Indicadores de progresso (etapa atual e total)
         ProgressIndicators(
-            currentStep = 2, // Segunda etapa
-            totalSteps = 2,  // Total de etapas é fixado em 2
-            activeColor = primaryColor, // Cor da etapa atual
-            inactiveColor = textFieldBackground // Cor das etapas inativas
+            currentStep = 2,
+            totalSteps = 2,
+            activeColor = primaryColor,
+            inactiveColor = textFieldBackground
         )
         Spacer(modifier = Modifier.height(35.dp))
 
-        // Campo Morada
+        // Campo para Morada
         OutlinedTextField(
             value = address,
             onValueChange = { address = it },
@@ -104,7 +108,7 @@ fun FinalizeAccountScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Campo Código Postal
+        // Campo para Código Postal
         OutlinedTextField(
             value = postalCode,
             onValueChange = { input ->
@@ -114,7 +118,7 @@ fun FinalizeAccountScreen(
                 }
             },
             label = { Text("Código Postal", color = secondaryColor) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text), // Altera para permitir "-"
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             singleLine = true,
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 containerColor = textFieldBackground,
@@ -126,7 +130,7 @@ fun FinalizeAccountScreen(
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        // Seção de Género
+        // Seção de seleção de Género
         Text(
             text = "Género",
             fontSize = 16.sp,
@@ -141,6 +145,7 @@ fun FinalizeAccountScreen(
                 .padding(vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Lista de opções de género
             listOf("Masculino", "Feminino", "Outro").forEach { option ->
                 Row(
                     Modifier
@@ -163,7 +168,7 @@ fun FinalizeAccountScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Tipo Utilizador
+        // Tipo de Utilizador (dropdown menu)
         Text(
             text = "Tipo Utilizador",
             fontSize = 16.sp,
@@ -180,6 +185,7 @@ fun FinalizeAccountScreen(
                 .padding(start = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Caixa clicável que mostra o tipo de utilizador selecionado
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.4f)
@@ -203,6 +209,7 @@ fun FinalizeAccountScreen(
             }
         }
 
+        // Menu dropdown para seleção de tipo de utilizador
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.4f)
@@ -227,10 +234,10 @@ fun FinalizeAccountScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Botão "Criar Conta"
+        // Botão para finalizar criação da conta
         Button(
             onClick = {
-                if (postalCode.matches(Regex("^\\d{4}-\\d{3}$"))) { // Valida o formato ####-###
+                if (postalCode.matches(Regex("^\\d{4}-\\d{3}$"))) { // Valida o formato do código postal
                     userViewModel.updateFinalizeData(
                         address = address,
                         postalCode = postalCode,
@@ -238,6 +245,7 @@ fun FinalizeAccountScreen(
                         userType = userType
                     )
 
+                    // Regista o utilizador no Firebase
                     registerUser(
                         userViewModel = userViewModel,
                         onSuccess = {

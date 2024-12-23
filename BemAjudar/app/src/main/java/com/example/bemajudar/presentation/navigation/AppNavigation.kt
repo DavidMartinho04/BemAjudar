@@ -23,6 +23,8 @@ import androidx.navigation.compose.composable
 import com.example.bemajudar.presentation.admin.AdminMenu
 import com.example.bemajudar.presentation.admin.DonationsAreaAdminScreen
 import com.example.bemajudar.presentation.admin.SocialAreaAdminScreen
+import com.example.bemajudar.presentation.admin.VolunteerDetailScreen
+import com.example.bemajudar.presentation.admin.VolunteerManagementScreen
 import com.example.bemajudar.presentation.createaccount.CreateAccountScreen
 import com.example.bemajudar.presentation.createaccount.FinalizeAccountScreen
 import com.example.bemajudar.presentation.login.LoginScreen
@@ -44,10 +46,10 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "login",
+            startDestination = "volunteerManagement",
             modifier = Modifier.padding(innerPadding)
         ) {
-            // Tela de Login
+            // Ecrã de Login
             composable("login") {
                 showBottomNav.value = false
                 LoginScreen(
@@ -66,7 +68,7 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                 )
             }
 
-            // Tela de Criação de Conta
+            // Ecrã de Criação de Conta
             composable("createAccount") {
                 showBottomNav.value = false
                 CreateAccountScreen(
@@ -77,7 +79,7 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                 )
             }
 
-            // Tela de Finalização da Conta
+            // Ecrã de Finalização da Conta
             composable("finalizeAccount") {
                 showBottomNav.value = false
                 FinalizeAccountScreen(
@@ -87,20 +89,29 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                     userViewModel = userViewModel
                 )
             }
-            // Telas do Gestor
+            // Ecrãs do Gestor
             composable("menuAdmin") {
                 showBottomNav.value = true
                 AdminMenu()
             }
             composable("socialAdmin") {
                 showBottomNav.value = true
-                SocialAreaAdminScreen()
+                SocialAreaAdminScreen(navController = navController)
             }
             composable("donationsAdmin") {
                 showBottomNav.value = true
                 DonationsAreaAdminScreen()
             }
-            // Telas do Voluntário
+            // Nova rota para Gerir Voluntários
+            composable("volunteerManagement") {
+                showBottomNav.value = true
+                VolunteerManagementScreen(navController = navController) // Chama o ecrã de gestão de voluntários
+            }
+            composable("volunteerDetail/{volunteerId}") { backStackEntry ->
+                val volunteerId = backStackEntry.arguments?.getString("volunteerId") ?: ""
+                VolunteerDetailScreen(volunteerId = volunteerId)
+            }
+            // Ecrãs do Voluntário
             composable("menuVolunteer") {
                 showBottomNav.value = true
                 VolunteerMenu()

@@ -19,63 +19,74 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 
 @Composable
-fun SocialAreaAdminScreen() {
+fun SocialAreaAdminScreen(navController: NavHostController) {
+    // Interface para a área social do administrador
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxSize() // Preenche todo o espaço disponível
+            .padding(16.dp), // Margem interna de 16dp em toda a volta
+        horizontalAlignment = Alignment.CenterHorizontally // Alinha os itens horizontalmente ao centro
     ) {
+        // Título principal
         Text(
-            text = "Área Social A",
-            fontSize = 30.sp, // Título maior
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            modifier = Modifier.align(Alignment.Start)
+            text = "Área Social", // Texto do título
+            fontSize = 30.sp, // Tamanho maior do texto
+            fontWeight = FontWeight.Bold, // Texto em negrito
+            color = Color.Black, // Cor preta para o texto
+            modifier = Modifier.align(Alignment.Start) // Alinha o título ao início (esquerda)
         )
 
-        Spacer(modifier = Modifier.height(32.dp)) // Espaçamento maior abaixo do título
+        Spacer(modifier = Modifier.height(32.dp)) // Espaçamento entre o título e o próximo elemento
 
+        // Lista de opções com botões
         listOf(
-            "Registar Visitante" to "Registar um novo visitante",
+            "Criar Evento" to "Criar um novo evento de voluntariado", // Opção: título e subtítulo
             "Gerir Eventos" to "Verificar os eventos que irão decorrer",
-            "Gerir Visitantes" to "Verificar os visitantes do sistema",
-            "Criar Visita" to "Registar uma nova visita na loja social",
+            "Gerir Voluntários" to "Verificar os voluntários do sistema",
+            "Criar Visitantes" to "Verificar os visitantes do sistema",
             "Consultar Visitas" to "Listagem de visitas diárias na loja"
-        ).forEach { (title, subtitle) ->
+        ).forEach { (title, subtitle) -> // Itera por cada par (título e subtítulo) da lista
             Button(
-                onClick = { /* Navegação futura */ },
+                onClick = {
+                    when (title) {
+                        "Gerir Voluntários" -> navController.navigate("volunteerManagement")
+                        // Outros casos podem ser adicionados aqui
+                    }
+                }, // Ação executada ao clicar no botão
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp) // Altura maior para os botões
-                    .padding(vertical = 12.dp), // Espaçamento entre botões
-                shape = RoundedCornerShape(16.dp), // Cantos mais arredondados
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                border = BorderStroke(2.dp, Color(0xFF025997)) // Borda mais espessa
+                    .fillMaxWidth() // Botão ocupa toda a largura disponível
+                    .height(100.dp) // Altura do botão definida para 100dp
+                    .padding(vertical = 12.dp), // Espaçamento vertical entre os botões
+                shape = RoundedCornerShape(16.dp), // Cantos arredondados do botão com raio de 16dp
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Cor de fundo branca
+                border = BorderStroke(2.dp, Color(0xFF025997)) // Borda azul com espessura de 2dp
             ) {
+                // Conteúdo do botão
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp), // Alinha os textos à esquerda
-                    verticalArrangement = Arrangement.Center
+                        .fillMaxWidth() // Preenche toda a largura do botão
+                        .padding(start = 16.dp), // Margem interna no início (esquerda)
+                    verticalArrangement = Arrangement.Center // Alinha verticalmente ao centro
                 ) {
+                    // Título do botão
                     Text(
-                        text = title,
-                        color = Color(0xFF025997),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp, // Tamanho maior para o título
-                        modifier = Modifier.padding(bottom = 4.dp) // Espaçamento entre título e subtítulo
+                        text = title, // Texto do título
+                        color = Color(0xFF025997), // Cor azul
+                        fontWeight = FontWeight.Bold, // Texto em negrito
+                        fontSize = 20.sp, // Tamanho maior para o texto
+                        modifier = Modifier.padding(bottom = 4.dp) // Espaçamento inferior entre título e subtítulo
                     )
+                    // Subtítulo do botão
                     Text(
-                        text = subtitle,
-                        color = Color.Gray,
-                        fontSize = 16.sp // Tamanho maior para o subtítulo
+                        text = subtitle, // Texto do subtítulo
+                        color = Color.Gray, // Cor cinzenta
+                        fontSize = 16.sp // Tamanho médio do texto
                     )
                 }
             }
         }
     }
 }
-

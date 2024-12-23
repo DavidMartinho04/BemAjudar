@@ -1,5 +1,6 @@
 package com.example.bemajudar.presentation.createaccount
 
+// Importações necessárias para o funcionamento do ecrã
 import android.app.DatePickerDialog
 import android.net.Uri
 import android.widget.Toast
@@ -52,22 +53,23 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.example.bemajudar.ui.components.ProgressIndicators
+import com.google.firebase.storage.FirebaseStorage
 import java.util.Calendar
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateAccountScreen(
-    onNextClick: () -> Unit, // Modificamos para não passar dados diretamente
-    userViewModel: UserViewModel = viewModel() // Injeta o ViewModel no ecrã
+    onNextClick: () -> Unit, // Callback para navegação para o próximo ecrã
+    userViewModel: UserViewModel = viewModel() // ViewModel para armazenar os dados do utilizador
 ) {
-    // Definições de cores utilizadas
+    // Definição das cores usadas na interface
     val primaryColor = Color(0xFF625BFF)
-    val pointColor = Color(0xFF025997)
     val avatarBackground = Color(0xFFEADDFF)
     val textFieldBackground = Color(0xFFF3F3F3)
     val secondaryColor = Color(0xFF6F6F6F)
 
-    // Estados para os valores do formulário
+    // Estados locais para os valores do formulário
     var name by remember { mutableStateOf("") }
     var birthDate by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
@@ -76,6 +78,7 @@ fun CreateAccountScreen(
     var photoUri by remember { mutableStateOf<Uri?>(null) }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    // Contexto da aplicação, utilizado para criar diálogos e mostrar Toasts
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
@@ -90,13 +93,14 @@ fun CreateAccountScreen(
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
-    // Configuração do launcher para seleção de imagem
+    // Configuração do launcher para selecionar uma foto da galeria
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         photoUri = uri
     }
 
+    // Layout principal do ecrã
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -104,6 +108,7 @@ fun CreateAccountScreen(
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Título do ecrã
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = "Criar Conta",
@@ -117,10 +122,10 @@ fun CreateAccountScreen(
 
         // Indicadores de progresso
         ProgressIndicators(
-            currentStep = 1, // Primeira etapa
-            totalSteps = 2,  // Total de etapas é fixado em 2
-            activeColor = primaryColor, // Cor da etapa atual
-            inactiveColor = textFieldBackground // Cor das etapas inativas
+            currentStep = 1, // Passo atual (primeiro de dois)
+            totalSteps = 2, // Número total de passos
+            activeColor = primaryColor, // Cor para o passo ativo
+            inactiveColor = textFieldBackground // Cor para os passos inativos
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -131,6 +136,7 @@ fun CreateAccountScreen(
                 .background(avatarBackground, CircleShape),
             contentAlignment = Alignment.Center
         ) {
+            // Exibe a imagem selecionada, se disponível
             if (photoUri != null) {
                 Image(
                     painter = rememberAsyncImagePainter(model = photoUri),
@@ -143,6 +149,7 @@ fun CreateAccountScreen(
             }
         }
 
+        // Botão para selecionar uma foto
         TextButton(
             onClick = { launcher.launch("image/*") },
         ) {
@@ -172,6 +179,7 @@ fun CreateAccountScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo para selecionar a data de nascimento
         OutlinedTextField(
             value = birthDate,
             onValueChange = { },
@@ -199,6 +207,7 @@ fun CreateAccountScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo para o número de telefone
         OutlinedTextField(
             value = phoneNumber,
             onValueChange = { phoneNumber = it },
@@ -214,6 +223,7 @@ fun CreateAccountScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo para o email
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -229,6 +239,7 @@ fun CreateAccountScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo para a palavra-passe
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -254,9 +265,12 @@ fun CreateAccountScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        // Botão para avançar para o próximo passo
         Button(
             onClick = {
+                val localPhotoUri = photoUri
                 when {
+                    // Validações antes de prosseguir
                     name.isEmpty() -> Toast.makeText(
                         context,
                         "O nome não pode estar vazio!",
@@ -290,18 +304,39 @@ fun CreateAccountScreen(
                             Toast.LENGTH_SHORT
                         ).show()
 
-                    else -> {
-                        // Atualiza os dados no ViewModel
-                        userViewModel.updateUserData(
-                            photoUri = photoUri,
-                            name = name,
-                            birthDate = birthDate,
-                            phone = phoneNumber,
-                            email = email,
-                            password = password
+                    localPhotoUri != null -> {
+                        // Faz upload da foto para o Firebase Storage
+                        uploadPhotoToFirebaseStorage(
+                            photoUri = localPhotoUri,
+                            onSuccess = { photoUrl ->
+                                // Atualiza os dados do utilizador no ViewModel
+                                userViewModel.updateUserData(
+                                    photoUrl = photoUrl,
+                                    name = name,
+                                    birthDate = birthDate,
+                                    phone = phoneNumber,
+                                    email = email,
+                                    password = password
+                                )
+                                // Avança para o próximo ecrã
+                                onNextClick()
+                            },
+                            onFailure = {
+                                Toast.makeText(
+                                    context,
+                                    "Erro ao carregar a foto: ${it.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         )
-                        // Navega para o próximo ecrã
-                        onNextClick()
+                    }
+
+                    else -> {
+                        Toast.makeText(
+                            context,
+                            "Por favor, selecione uma foto antes de continuar.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             },
@@ -318,4 +353,27 @@ fun CreateAccountScreen(
             )
         }
     }
+}
+
+// Função para fazer upload da foto para o Firebase Storage
+fun uploadPhotoToFirebaseStorage(
+    photoUri: Uri, // URI da foto a ser carregada
+    onSuccess: (String) -> Unit, // Callback de sucesso com o URL da foto
+    onFailure: (Exception) -> Unit // Callback de falha com a exceção
+) {
+    val storageRef = FirebaseStorage.getInstance().reference
+    val fileName = "${UUID.randomUUID()}.jpg" // Nome único para o arquivo
+    val photoRef = storageRef.child("user_photos/$fileName")
+
+    // Faz upload do arquivo para o Firebase Storage
+    photoRef.putFile(photoUri)
+        .addOnSuccessListener {
+            // Obtém o URL de download após o upload
+            photoRef.downloadUrl.addOnSuccessListener { uri ->
+                onSuccess(uri.toString())
+            }
+        }
+        .addOnFailureListener { exception ->
+            onFailure(exception)
+        }
 }

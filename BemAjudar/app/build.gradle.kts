@@ -73,6 +73,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("androidx.navigation:navigation-compose:2.7.3")
     implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation ("com.google.firebase:firebase-storage:20.2.1")
 }
 
 // Aplicar o plugin Google Services

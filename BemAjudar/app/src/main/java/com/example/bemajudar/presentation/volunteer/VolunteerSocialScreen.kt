@@ -25,19 +25,20 @@ fun SocialAreaVolunteerScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp), // Espaçamento interno da coluna
+        horizontalAlignment = Alignment.CenterHorizontally // Alinha elementos horizontalmente
     ) {
         Text(
             text = "Área Social",
-            fontSize = 30.sp, // Título maior
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            modifier = Modifier.align(Alignment.Start)
+            fontSize = 30.sp, // Tamanho do texto do título principal
+            fontWeight = FontWeight.Bold, // Texto em negrito para destaque
+            color = Color.Black, // Cor preta para o título
+            modifier = Modifier.align(Alignment.Start) // Alinha o texto à esquerda
         )
 
-        Spacer(modifier = Modifier.height(32.dp)) // Espaçamento maior abaixo do título
+        Spacer(modifier = Modifier.height(32.dp)) // Espaçamento entre o título e os botões
 
+        // Lista de ações disponíveis na área social
         listOf(
             "Registar Visitante" to "Registar um novo visitante",
             "Gerir Eventos" to "Verificar os eventos que irão decorrer",
@@ -46,36 +47,35 @@ fun SocialAreaVolunteerScreen() {
             "Consultar Visitas" to "Listagem de visitas diárias na loja"
         ).forEach { (title, subtitle) ->
             Button(
-                onClick = { /* Navegação futura */ },
+                onClick = { /* Implementar navegação ou funcionalidade futura */ },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp) // Altura maior para os botões
-                    .padding(vertical = 12.dp), // Espaçamento entre botões
-                shape = RoundedCornerShape(16.dp), // Cantos mais arredondados
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                border = BorderStroke(2.dp, Color(0xFF025997)) // Borda mais espessa
+                    .fillMaxWidth() // O botão ocupa toda a largura disponível
+                    .height(100.dp) // Define a altura dos botões
+                    .padding(vertical = 12.dp), // Espaçamento entre os botões
+                shape = RoundedCornerShape(16.dp), // Cantos arredondados para suavidade visual
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Fundo branco para contraste
+                border = BorderStroke(2.dp, Color(0xFF025997)) // Borda azul para realce
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp), // Alinha os textos à esquerda
-                    verticalArrangement = Arrangement.Center
+                        .fillMaxWidth() // O conteúdo do botão ocupa toda a largura disponível
+                        .padding(start = 16.dp), // Espaçamento interno alinhado à esquerda
+                    verticalArrangement = Arrangement.Center // Centraliza verticalmente o conteúdo do botão
                 ) {
                     Text(
-                        text = title,
-                        color = Color(0xFF025997),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp, // Tamanho maior para o título
-                        modifier = Modifier.padding(bottom = 4.dp) // Espaçamento entre título e subtítulo
+                        text = title, // Texto principal do botão
+                        color = Color(0xFF025997), // Cor azul para o título
+                        fontWeight = FontWeight.Bold, // Texto em negrito
+                        fontSize = 20.sp, // Tamanho do texto principal
+                        modifier = Modifier.padding(bottom = 4.dp) // Espaçamento entre o título e o subtítulo
                     )
                     Text(
-                        text = subtitle,
-                        color = Color.Gray,
-                        fontSize = 16.sp // Tamanho maior para o subtítulo
+                        text = subtitle, // Texto descritivo do botão
+                        color = Color.Gray, // Cor cinza para o subtítulo
+                        fontSize = 16.sp // Tamanho menor para o subtítulo
                     )
                 }
             }
         }
     }
 }
-

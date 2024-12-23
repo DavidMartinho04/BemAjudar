@@ -1,5 +1,6 @@
 package com.example.bemajudar.presentation.login
 
+// Importações necessárias para os componentes Compose e Firebase
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -47,18 +48,21 @@ import com.google.firebase.firestore.FirebaseFirestore
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (String) -> Unit, // Navegação com base no tipo de user
-    onCreateAccountClick: () -> Unit // Navegação para criar conta
+    onLoginSuccess: (String) -> Unit, // Callback para navegação com base no tipo de utilizador
+    onCreateAccountClick: () -> Unit // Callback para navegação ao ecrã de criação de conta
 ) {
+    // Definições de cores para a interface
     val primaryColor = Color(0xFF025997)
     val secondaryColor = Color(0xFF6F6F6F)
     val textFieldBackground = Color(0xFFF2F2F2)
     val blackColor = Color(0xFF000000)
 
+    // Estados para email e palavra-passe
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
+    var passwordVisible by remember { mutableStateOf(false) } // Controla a visibilidade da palavra-passe
 
+    // Inicializa Firebase Auth e Firestore
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
@@ -70,7 +74,7 @@ fun LoginScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Logo
+        // Logo da aplicação
         Image(
             painter = painterResource(id = R.drawable.bemajudar),
             contentDescription = "Logo Bem Ajudar",
@@ -81,7 +85,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Texto de boas-vindas
+        // Mensagem de boas-vindas
         Text(
             text = "Bem Vindo",
             fontSize = 22.sp,
@@ -161,16 +165,16 @@ fun LoginScreen(
                             if (task.isSuccessful) {
                                 val uid = auth.currentUser?.uid
                                 if (uid != null) {
-                                    // Busca o tipo de user no Firestore
+                                    // Verifica o tipo de utilizador no Firestore
                                     db.collection("users").document(uid).get()
                                         .addOnSuccessListener { document ->
                                             if (document.exists()) {
                                                 val userType = document.getString("userType") ?: "Voluntário"
-                                                onLoginSuccess(userType) // Navega com base no tipo
+                                                onLoginSuccess(userType) // Navega com base no tipo de utilizador
                                             } else {
                                                 Toast.makeText(
                                                     context,
-                                                    "User não encontrado!",
+                                                    "Utilizador não encontrado!",
                                                     Toast.LENGTH_SHORT
                                                 ).show()
                                             }
@@ -178,17 +182,14 @@ fun LoginScreen(
                                         .addOnFailureListener {
                                             Toast.makeText(
                                                 context,
-                                                "Erro ao buscar User: ${it.message}",
+                                                "Erro ao buscar utilizador: ${translateFirebaseError(it.message)}",
                                                 Toast.LENGTH_SHORT
                                             ).show()
                                         }
                                 }
                             } else {
-                                Toast.makeText(
-                                    context,
-                                    "Erro no login: ${task.exception?.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                val errorMessage = translateFirebaseError(task.exception?.message)
+                                Toast.makeText(context, "Erro no login: $errorMessage", Toast.LENGTH_SHORT).show()
                             }
                         }
                 } else {
@@ -210,7 +211,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Texto para redefinir passe
+        // Texto para redefinir a palavra-passe
         TextButton(
             onClick = {
                 if (email.isNotEmpty()) {
@@ -223,11 +224,8 @@ fun LoginScreen(
                                     Toast.LENGTH_SHORT
                                 ).show()
                             } else {
-                                Toast.makeText(
-                                    context,
-                                    "Erro: ${task.exception?.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                val errorMessage = translateFirebaseError(task.exception?.message)
+                                Toast.makeText(context, "Erro: $errorMessage", Toast.LENGTH_SHORT).show()
                             }
                         }
                 } else {
@@ -263,4 +261,17 @@ fun LoginScreen(
             }
         }
     }
+}
+
+// Função para traduzir mensagens de erro do Firebase
+fun translateFirebaseError(message: String?): String {
+    val errorMessages = mapOf(
+        "The email address is badly formatted." to "O formato do email é inválido.",
+        "The password is invalid or the user does not have a password." to "A palavra-passe está incorreta.",
+        "There is no user record corresponding to this identifier. The user may have been deleted." to "Este email não está registado.",
+        "The email address is already in use by another account." to "O email já está em uso por outra conta.",
+        "Password should be at least 6 characters" to "A palavra-passe deve ter pelo menos 6 caracteres.",
+        "We have blocked all requests from this device due to unusual activity. Try again later." to "Bloqueamos os pedidos deste dispositivo devido a atividade incomum. Tente mais tarde."
+    )
+    return errorMessages[message] ?: "Ocorreu um erro inesperado. Tente novamente."
 }
