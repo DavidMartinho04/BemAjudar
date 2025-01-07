@@ -11,7 +11,6 @@ class UserViewModel : ViewModel() {
     var phone: String = "" // Número de telemóvel do utilizador
     var email: String = "" // Endereço de email do utilizador
     var password: String = "" // Palavra-passe do utilizador
-    var id: String = "" // Id do utilizador
     // Dados do segundo formulário
     var address: String = "" // Morada do utilizador
     var postalCode: String = "" // Código postal do utilizador

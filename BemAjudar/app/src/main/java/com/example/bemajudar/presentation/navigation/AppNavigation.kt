@@ -93,7 +93,7 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
             // Ecrãs do Gestor
             composable("menuAdmin") {
                 showBottomNav.value = true
-                AdminMenu()
+                AdminMenu(navController = navController)
             }
             composable("socialAdmin") {
                 showBottomNav.value = true
@@ -115,7 +115,7 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
             // Ecrãs do Voluntário
             composable("menuVolunteer") {
                 showBottomNav.value = true
-                VolunteerMenu()
+                VolunteerMenu(navController = navController)
             }
             composable("socialVolunteer") {
                 showBottomNav.value = true
