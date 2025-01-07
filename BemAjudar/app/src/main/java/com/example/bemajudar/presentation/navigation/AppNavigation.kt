@@ -46,7 +46,7 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "volunteerManagement",
+            startDestination = "login",
             modifier = Modifier.padding(innerPadding)
         ) {
             // Ecrã de Login
@@ -54,7 +54,10 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                 showBottomNav.value = false
                 LoginScreen(
                     onLoginSuccess = { userType ->
+                        // Define o tipo de utilizador no UserViewModel
                         userViewModel.userType = userType
+
+                        // Navega para o menu correto com base no tipo de utilizador
                         if (userType == "Gestor") {
                             navController.navigate("menuAdmin")
                         } else {
@@ -63,10 +66,12 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                         showBottomNav.value = true
                     },
                     onCreateAccountClick = {
+                        // Navega para o ecrã de criação de conta
                         navController.navigate("createAccount")
                     }
                 )
             }
+
 
             // Ecrã de Criação de Conta
             composable("createAccount") {

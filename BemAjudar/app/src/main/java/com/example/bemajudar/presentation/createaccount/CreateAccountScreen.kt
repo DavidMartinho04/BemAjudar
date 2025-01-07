@@ -53,6 +53,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.example.bemajudar.ui.components.ProgressIndicators
+import com.example.bemajudar.utils.isInternetAvailable
 import com.google.firebase.storage.FirebaseStorage
 import java.util.Calendar
 import java.util.UUID
@@ -151,7 +152,13 @@ fun CreateAccountScreen(
 
         // Botão para selecionar uma foto
         TextButton(
-            onClick = { launcher.launch("image/*") },
+            onClick = {
+                if (isInternetAvailable(context)) {
+                    launcher.launch("image/*")
+                } else {
+                    Toast.makeText(context, "Sem ligação à internet. Não é possível selecionar uma foto.", Toast.LENGTH_LONG).show()
+                }
+            }
         ) {
             Text(
                 text = "Selecionar Foto",
@@ -270,7 +277,6 @@ fun CreateAccountScreen(
             onClick = {
                 val localPhotoUri = photoUri
                 when {
-                    // Validações antes de prosseguir
                     name.isEmpty() -> Toast.makeText(
                         context,
                         "O nome não pode estar vazio!",
@@ -304,12 +310,11 @@ fun CreateAccountScreen(
                             Toast.LENGTH_SHORT
                         ).show()
 
-                    localPhotoUri != null -> {
-                        // Faz upload da foto para o Firebase Storage
+                    localPhotoUri != null && isInternetAvailable(context) -> {
+                        // Upload apenas se tiver internet
                         uploadPhotoToFirebaseStorage(
                             photoUri = localPhotoUri,
                             onSuccess = { photoUrl ->
-                                // Atualiza os dados do utilizador no ViewModel
                                 userViewModel.updateUserData(
                                     photoUrl = photoUrl,
                                     name = name,
@@ -318,25 +323,33 @@ fun CreateAccountScreen(
                                     email = email,
                                     password = password
                                 )
-                                // Avança para o próximo ecrã
                                 onNextClick()
                             },
                             onFailure = {
-                                Toast.makeText(
-                                    context,
-                                    "Erro ao carregar a foto: ${it.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                userViewModel.updateUserData(
+                                    photoUrl = null,
+                                    name = name,
+                                    birthDate = birthDate,
+                                    phone = phoneNumber,
+                                    email = email,
+                                    password = password
+                                )
+                                onNextClick()
                             }
                         )
                     }
 
-                    else -> {
-                        Toast.makeText(
-                            context,
-                            "Por favor, selecione uma foto antes de continuar.",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    localPhotoUri == null || !isInternetAvailable(context) -> {
+                        // Permite continuar mesmo sem foto ou internet
+                        userViewModel.updateUserData(
+                            photoUrl = null,
+                            name = name,
+                            birthDate = birthDate,
+                            phone = phoneNumber,
+                            email = email,
+                            password = password
+                        )
+                        onNextClick()
                     }
                 }
             },
@@ -352,6 +365,7 @@ fun CreateAccountScreen(
                 fontSize = 16.sp
             )
         }
+
     }
 }
 
