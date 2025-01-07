@@ -27,6 +27,7 @@ import com.example.bemajudar.presentation.admin.VolunteerDetailScreen
 import com.example.bemajudar.presentation.admin.VolunteerManagementScreen
 import com.example.bemajudar.presentation.createaccount.CreateAccountScreen
 import com.example.bemajudar.presentation.createaccount.FinalizeAccountScreen
+import com.example.bemajudar.presentation.events.CreateEventScreen
 import com.example.bemajudar.presentation.login.LoginScreen
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.example.bemajudar.presentation.volunteer.DonationsAreaVolunteerScreen
@@ -46,7 +47,7 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "volunteerManagement",
+            startDestination = "login",
             modifier = Modifier.padding(innerPadding)
         ) {
             // Ecrã de Login
@@ -124,6 +125,15 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                 showBottomNav.value = true
                 DonationsAreaVolunteerScreen()
             }
+
+            composable("createEvent") {
+                showBottomNav.value = true
+                CreateEventScreen(
+                    navController = navController,
+                    userViewModel = userViewModel
+                )
+            }
+
         }
     }
 }
