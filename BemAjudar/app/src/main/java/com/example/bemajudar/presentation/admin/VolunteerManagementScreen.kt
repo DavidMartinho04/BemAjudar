@@ -25,11 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.example.bemajudar.R
 import com.google.firebase.firestore.FirebaseFirestore
 
 data class Volunteer(
@@ -95,7 +97,7 @@ fun VolunteerManagementScreen(navController: NavHostController) {
 
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth() // Ocupa 100% da largura do ecrã
+                        .fillMaxWidth()
                         .padding(vertical = 10.dp)
                         .clickable { // Navegar para a página de detalhes ao clicar
                             navController.navigate("volunteerDetail/${volunteer.id}")
@@ -109,15 +111,24 @@ fun VolunteerManagementScreen(navController: NavHostController) {
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Foto de perfil com crop e estilo
-                        if (volunteer.photoUrl != null) {
+                        // Foto de perfil com verificação para null ou string vazia
+                        if (!volunteer.photoUrl.isNullOrEmpty()) {
                             Image(
                                 painter = rememberAsyncImagePainter(volunteer.photoUrl),
                                 contentDescription = "Foto de ${volunteer.name}",
                                 modifier = Modifier
-                                    .size(50.dp) // Tamanho ajustado da imagem
+                                    .size(50.dp)
                                     .clip(CircleShape),
-                                contentScale = ContentScale.Crop // Faz o crop da imagem
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_default_avatar),
+                                contentDescription = "Avatar padrão",
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
                             )
                         }
 

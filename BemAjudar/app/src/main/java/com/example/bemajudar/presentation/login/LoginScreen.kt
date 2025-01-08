@@ -43,8 +43,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bemajudar.R
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
+import com.example.bemajudar.data.AppDatabase
+import com.example.bemajudar.presentation.createaccount.hashPassword
+import com.example.bemajudar.utils.isInternetAvailable
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,51 +1,166 @@
 package com.example.bemajudar.data.firebase
 
+
 import com.example.bemajudar.presentation.events.EventItem
+import android.content.Context
+import android.widget.Toast
+import com.example.bemajudar.data.AppDatabase
+import com.example.bemajudar.data.local.UserEntity
+import com.example.bemajudar.domain.model.DonationItem
+import com.example.bemajudar.presentation.createaccount.hashPassword
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
+import com.example.bemajudar.utils.isInternetAvailable
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.UUID
 
 fun registerUser(
-    userViewModel: UserViewModel, // ViewModel que contém os dados do utilizador
-    onSuccess: () -> Unit, // Callback para executar em caso de sucesso
-    onFailure: (Exception) -> Unit // Callback para executar em caso de falha
+    context: Context,
+    userViewModel: UserViewModel,
+    onSuccess: () -> Unit,
+    onFailure: (Exception) -> Unit
 ) {
-    val auth = FirebaseAuth.getInstance() // Obtem a instância do Firebase Authentication
-    val db = FirebaseFirestore.getInstance() // Obtem a instância do Firestore
+    val auth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
+    val roomDb = AppDatabase.getDatabase(context)
 
-    // Criação do utilizador no Firebase Authentication
-    auth.createUserWithEmailAndPassword(userViewModel.email, userViewModel.password)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val userId = task.result?.user?.uid // Obtem o UID do utilizador criado
+    val authToken = UUID.randomUUID().toString()
+    val hashedPassword = hashPassword(userViewModel.password)
+    val plainPassword = userViewModel.password 
 
-                // Dados do utilizador a serem guardados no Firestore
-                val userData = mapOf(
-                    "id" to userId, // ID único do utilizador
-                    "photoUrl" to (userViewModel.photoUrl ?: ""), // URL da imagem de perfil
-                    "name" to userViewModel.name, // Nome do utilizador
-                    "birthDate" to userViewModel.birthDate, // Data de nascimento
-                    "phone" to userViewModel.phone, // Número de telemóvel
-                    "email" to userViewModel.email, // Endereço de email
-                    "address" to userViewModel.address, // Morada do utilizador
-                    "postalCode" to userViewModel.postalCode, // Código postal
-                    "gender" to userViewModel.gender, // Género do utilizador
-                    "userType" to userViewModel.userType // Tipo de utilizador (Gestor ou Voluntário)
-                )
+    if (isInternetAvailable(context)) {
+        auth.createUserWithEmailAndPassword(userViewModel.email, plainPassword)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val userId = task.result?.user?.uid ?: return@addOnCompleteListener
 
-                userId?.let {
-                    // Guarda os dados no Firestore, na coleção "users", com o UID como documento
-                    db.collection("users").document(it)
-                        .set(userData) // Adiciona os dados do utilizador
-                        .addOnSuccessListener { onSuccess() } // Chama o callback de sucesso
-                        .addOnFailureListener { e -> onFailure(e) } // Chama o callback de falha com a exceção
+                    val userData = mapOf(
+                        "id" to userId,
+                        "name" to userViewModel.name,
+                        "email" to userViewModel.email,
+                        "photoUrl" to (userViewModel.photoUrl ?: ""),
+                        "phone" to userViewModel.phone,
+                        "address" to userViewModel.address,
+                        "postalCode" to userViewModel.postalCode,
+                        "gender" to userViewModel.gender,
+                        "userType" to userViewModel.userType,
+                        "authToken" to hashedPassword
+                    )
+
+                    db.collection("users").document(userId).set(userData)
+                        .addOnSuccessListener {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val userEntity = UserEntity(
+                                    id = userId,
+                                    name = userViewModel.name,
+                                    email = userViewModel.email,
+                                    photoUrl = userViewModel.photoUrl ?: "",
+                                    phone = userViewModel.phone,
+                                    address = userViewModel.address,
+                                    postalCode = userViewModel.postalCode,
+                                    gender = userViewModel.gender,
+                                    userType = userViewModel.userType,
+                                    authToken = hashedPassword,
+                                    isSynced = true,
+                                    plainPassword = plainPassword 
+                                )
+                                roomDb.userDao().insertUser(userEntity)
+                                withContext(Dispatchers.Main) { onSuccess() }
+                            }
+                        }
+                        .addOnFailureListener { e -> onFailure(e) }
+                } else {
+                    onFailure(task.exception ?: Exception("Erro ao criar utilizador no Firebase."))
                 }
-            } else {
-                // Caso a criação do utilizador falhe, chama o callback de falha com a exceção
-                onFailure(task.exception ?: Exception("Erro desconhecido ao criar utilizador."))
+            }
+    } else {
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val userEntity = UserEntity(
+                id = authToken,
+                name = userViewModel.name,
+                email = userViewModel.email,
+                photoUrl = userViewModel.photoUrl ?: "",
+                phone = userViewModel.phone,
+                address = userViewModel.address,
+                postalCode = userViewModel.postalCode,
+                gender = userViewModel.gender,
+                userType = userViewModel.userType,
+                authToken = hashedPassword,
+                plainPassword = plainPassword, 
+                isSynced = false
+            )
+            roomDb.userDao().insertUser(userEntity)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Utilizador guardado offline. Sincronizará quando online.", Toast.LENGTH_LONG).show()
+                onSuccess()
             }
         }
+    }
 }
+
+
+fun sendDonationToFirestore(
+    donorName: String,
+    donationDescription: String,
+    deliveryDate: String,
+    items: List<DonationItem>,
+    onSuccess: () -> Unit,
+    onFailure: (Exception) -> Unit
+) {
+    val db = FirebaseFirestore.getInstance()
+
+    
+    val donationData = mapOf(
+        "donorName" to donorName,
+        "donationDescription" to donationDescription,
+        "deliveryDate" to deliveryDate,
+        "items" to items.map { item ->
+            mapOf(
+                "name" to item.name,
+                "description" to item.description,
+                "quantity" to item.quantity,
+                "type" to item.type,
+                "photoUrl" to (item.photoUri?.toString() ?: "") 
+            )
+        }
+    )
+
+    
+    db.collection("donations")
+        .add(donationData)
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { exception -> onFailure(exception) }
+}
+
+fun addVisitorToFirestore(
+    name: String,
+    nif: String,
+    address: String,
+    visitDate: String,
+    contact: String,
+    onSuccess: () -> Unit,
+    onFailure: (Exception) -> Unit
+) {
+    val db = FirebaseFirestore.getInstance()
+    val visitorData = mapOf(
+        "name" to name,
+        "nif" to nif,
+        "address" to address,
+        "contact" to contact,
+        "lastVisit" to visitDate
+    )
+
+    val newDocRef = db.collection("visitors").document()
+    newDocRef.set(visitorData + ("id" to newDocRef.id)) 
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { e -> onFailure(e) }
+}
+
 
 fun saveEvent(
     name: String,
@@ -66,7 +181,7 @@ fun saveEvent(
 
     db.collection("events").document(eventId).set(event)
         .addOnSuccessListener {
-            // Criar notificações para os voluntários
+            
             volunteers.forEach { volunteerEmail  ->
                 val notificationRef = db.collection("notifications").document()
                 val notification = hashMapOf(
@@ -79,7 +194,7 @@ fun saveEvent(
             }
         }
         .addOnFailureListener { e ->
-            // Log de erro
+            
             println("Erro ao salvar evento: $e")
         }
 }
@@ -99,7 +214,7 @@ fun fetchVolunteers(
                 val name = document.getString("name") ?: "Desconhecido"
                 val email = document.getString("email") ?: ""
 
-                // Verificar se o voluntário já está na lista
+               
                 if (userViewModel.volunteers.none { it.id == id }) {
                     userViewModel.addVolunteer(name, email, id)
                 }
@@ -110,6 +225,28 @@ fun fetchVolunteers(
             onFailure(exception)
         }
 }
+  
+    
+fun getVisitorsFromFirestore(
+    onSuccess: (List<Map<String, Any>>) -> Unit,
+    onFailure: (Exception) -> Unit
+) {
+    val db = FirebaseFirestore.getInstance()
+
+    db.collection("visitors")
+        .get()
+        .addOnSuccessListener { result ->
+            val visitorsList = result.documents.map { document ->
+                val visitorData = document.data ?: emptyMap()
+                visitorData + ("id" to document.id) 
+            }
+            onSuccess(visitorsList)
+        }
+        .addOnFailureListener { exception ->
+            onFailure(exception)
+        }
+}
+
 
 fun fetchPendingNotifications(userEmail: String, onResult: (List<Map<String, Any>>) -> Unit) {
     val db = FirebaseFirestore.getInstance()
@@ -188,3 +325,36 @@ fun fetchEvents(onEventsFetched: (List<EventItem>) -> Unit) {
             println("Erro ao buscar eventos: ${exception.message}")
         }
 }
+
+fun updateVisitTimeInFirestore(visitorId: String, lastVisit: String) {
+    if (visitorId.isBlank()) {
+        println("Erro: visitorId inválido.")
+        return
+    }
+    val db = FirebaseFirestore.getInstance()
+    db.collection("visitors").document(visitorId)
+        .update("lastVisit", lastVisit)
+        .addOnSuccessListener {
+            println("Hora da última visita atualizada com sucesso!")
+        }
+        .addOnFailureListener { e ->
+            println("Erro ao atualizar a hora da última visita: $e")
+        }
+}
+
+fun updateVisitorData(visitorId: String, updatedData: Map<String, Any>, onSuccess: () -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    db.collection("visitors").document(visitorId)
+        .update(updatedData)
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { e -> println("Erro ao atualizar visitante: $e") }
+}
+
+fun deleteVisitorFromFirestore(visitorId: String, onSuccess: () -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    db.collection("visitors").document(visitorId)
+        .delete()
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { e -> println("Erro ao eliminar visitante: $e") }
+}
+

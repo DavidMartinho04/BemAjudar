@@ -60,3 +60,4 @@ class UserViewModel : ViewModel() {
         val id: String // ID do utilizador
     )
 }
+

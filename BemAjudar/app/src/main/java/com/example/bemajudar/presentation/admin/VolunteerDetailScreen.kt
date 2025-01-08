@@ -28,10 +28,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.example.bemajudar.R
 import com.google.firebase.firestore.FirebaseFirestore
 
 
@@ -74,11 +76,20 @@ fun VolunteerDetailScreen(volunteerId: String) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Foto ampliada
-            if (it.photoUrl != null) {
+            // Foto ampliada com verificação de imagem
+            if (!it.photoUrl.isNullOrEmpty()) {
                 Image(
                     painter = rememberAsyncImagePainter(it.photoUrl),
                     contentDescription = "Foto de ${it.name}",
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_default_avatar),
+                    contentDescription = "Avatar Padrão",
                     modifier = Modifier
                         .size(120.dp)
                         .clip(CircleShape),
@@ -111,19 +122,17 @@ fun VolunteerDetailRow(icon: ImageVector, label: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp), // Espaçamento entre as linhas
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Ícone à esquerda
         Icon(
             imageVector = icon,
             contentDescription = "$label Icon",
-            tint = Color(0xFF000000), // Preto
+            tint = Color(0xFF000000),
             modifier = Modifier
                 .size(24.dp)
                 .padding(end = 8.dp)
         )
-        // Texto descritivo
         Column {
             Text(
                 text = label,
