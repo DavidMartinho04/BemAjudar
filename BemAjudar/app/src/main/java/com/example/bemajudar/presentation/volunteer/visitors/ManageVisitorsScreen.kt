@@ -250,6 +250,7 @@ fun UpdateVisitorForm(
                     onValueChange = { name = it },
                     label = { Text("Nome", color = Color.Black) },
                     textStyle = TextStyle(color = Color.Black),
+                    modifier = Modifier.padding(vertical = 6.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         focusedBorderColor = Color.Black,
                         unfocusedBorderColor = Color.Black,
@@ -261,6 +262,7 @@ fun UpdateVisitorForm(
                     onValueChange = { nif = it },
                     label = { Text("NIF", color = Color.Black) },
                     textStyle = TextStyle(color = Color.Black),
+                    modifier = Modifier.padding(vertical = 6.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         focusedBorderColor = Color.Black,
                         unfocusedBorderColor = Color.Black,
@@ -272,6 +274,7 @@ fun UpdateVisitorForm(
                     onValueChange = { address = it },
                     label = { Text("Morada", color = Color.Black) },
                     textStyle = TextStyle(color = Color.Black),
+                    modifier = Modifier.padding(vertical = 6.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         focusedBorderColor = Color.Black,
                         unfocusedBorderColor = Color.Black,
@@ -283,6 +286,7 @@ fun UpdateVisitorForm(
                     onValueChange = { contact = it },
                     label = { Text("Contacto", color = Color.Black) },
                     textStyle = TextStyle(color = Color.Black),
+                    modifier = Modifier.padding(vertical = 6.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         focusedBorderColor = Color.Black,
                         unfocusedBorderColor = Color.Black,
