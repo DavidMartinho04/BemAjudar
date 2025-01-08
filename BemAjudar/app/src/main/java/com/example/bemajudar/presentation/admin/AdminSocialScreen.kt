@@ -53,7 +53,8 @@ fun SocialAreaAdminScreen(navController: NavHostController) {
                 onClick = {
                     when (title) {
                         "Gerir Voluntários" -> navController.navigate("volunteerManagement")
-                        // Outros casos podem ser adicionados aqui
+                        "Criar Evento" -> navController.navigate("createEvent")
+                        "Gerir Eventos" -> navController.navigate("manageEventsScreen")
                     }
                 }, // Ação executada ao clicar no botão
                 modifier = Modifier

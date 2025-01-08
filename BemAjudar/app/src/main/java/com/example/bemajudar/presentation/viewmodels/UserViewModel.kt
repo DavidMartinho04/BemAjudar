@@ -1,5 +1,6 @@
 package com.example.bemajudar.presentation.viewmodels
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 
 class UserViewModel : ViewModel() {
@@ -10,7 +11,6 @@ class UserViewModel : ViewModel() {
     var phone: String = "" // Número de telemóvel do utilizador
     var email: String = "" // Endereço de email do utilizador
     var password: String = "" // Palavra-passe do utilizador
-
     // Dados do segundo formulário
     var address: String = "" // Morada do utilizador
     var postalCode: String = "" // Código postal do utilizador
@@ -46,4 +46,18 @@ class UserViewModel : ViewModel() {
         this.gender = gender
         this.userType = userType
     }
+
+    var volunteers = mutableStateListOf<Volunteer>()
+        private set
+
+    fun addVolunteer(name: String, email: String, id: String) {
+        volunteers.add(Volunteer(name, email, id))
+    }
+
+    data class Volunteer(
+        val name: String, // Nome do utilizador
+        val email: String, // Endereço de email
+        val id: String // ID do utilizador
+    )
 }
+
