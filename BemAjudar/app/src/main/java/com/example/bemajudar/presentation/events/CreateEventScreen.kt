@@ -1,35 +1,17 @@
 package com.example.bemajudar.presentation.events
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.*
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.Alignment
+import android.widget.Toast
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +20,9 @@ import com.example.bemajudar.data.firebase.fetchVolunteers
 import com.example.bemajudar.data.firebase.saveEvent
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
 
+val primaryColor = Color(0xFF025997)
+val secondaryColor = Color.Gray
+val textFieldBackground = Color(0xFFF0F0F0)
 
 @Composable
 fun CreateEventScreen(
@@ -49,12 +34,12 @@ fun CreateEventScreen(
     var eventDate by remember { mutableStateOf("") }
     var eventTime by remember { mutableStateOf("") }
     val selectedVolunteers = remember { mutableStateListOf<String>() }
+    val context = LocalContext.current
 
-    // Buscar voluntários ao carregar a tela
     LaunchedEffect(Unit) {
         fetchVolunteers(
             userViewModel = userViewModel,
-            onSuccess = { },
+            onSuccess = {},
             onFailure = { exception ->
                 println("Erro ao buscar voluntários: ${exception.message}")
             }
@@ -64,84 +49,85 @@ fun CreateEventScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(24.dp)
     ) {
-        Text("Criar Evento", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Campo Nome
-        Text("Nome", fontWeight = FontWeight.SemiBold)
-        OutlinedTextField(
-            value = eventName,
-            onValueChange = { eventName = it },
-            modifier = Modifier.fillMaxWidth()
+        Text(
+            text = "Criar Evento",
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        FormField("Nome do Evento", eventName) { eventName = it }
+        FormField("Descrição", eventDescription) { eventDescription = it }
+        FormField("Data", eventDate) { eventDate = it }
+        FormField("Hora", eventTime) { eventTime = it }
 
-        // Campo Descrição
-        Text("Descrição", fontWeight = FontWeight.SemiBold)
-        OutlinedTextField(
-            value = eventDescription,
-            onValueChange = { eventDescription = it },
-            modifier = Modifier.fillMaxWidth()
-        )
+        Spacer(modifier = Modifier.height(24.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Campo Data e Hora
-        Text("Data", fontWeight = FontWeight.SemiBold)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            OutlinedTextField(
-                value = eventDate,
-                onValueChange = { eventDate = it },
-                label = { Text("Data ")},
-                modifier = Modifier.weight(1f).padding(end = 8.dp)
-            )
-            OutlinedTextField(
-                value = eventTime,
-                onValueChange = { eventTime = it },
-                label = { Text("Horário") },
-                modifier = Modifier.weight(1f).padding(start = 8.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Seleção de Voluntários
         Text("Selecionar Voluntários", fontWeight = FontWeight.Bold, fontSize = 18.sp)
         LazyColumn {
             items(userViewModel.volunteers) { volunteer ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
                 ) {
                     Checkbox(
                         checked = selectedVolunteers.contains(volunteer.email),
                         onCheckedChange = {
                             if (it) selectedVolunteers.add(volunteer.email)
                             else selectedVolunteers.remove(volunteer.email)
-                        }
+                        },
+                        colors = CheckboxDefaults.colors(checkedColor = primaryColor)
                     )
                     Text(volunteer.name)
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // Botão para Criar Evento
         Button(
             onClick = {
-                saveEvent(eventName, eventDescription, "$eventDate $eventTime", selectedVolunteers)
+                if (eventName.isBlank() || eventDescription.isBlank() || eventDate.isBlank() || eventTime.isBlank()) {
+                    Toast.makeText(context, "Todos os campos devem ser preenchidos.", Toast.LENGTH_SHORT).show()
+                } else {
+                    saveEvent(eventName, eventDescription, "$eventDate $eventTime", selectedVolunteers)
+                    Toast.makeText(context, "Evento criado com sucesso!", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
+                }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
         ) {
-            Text("Criar Evento")
+            Text("Criar Evento", fontSize = 18.sp, color = Color.White, fontWeight = FontWeight.Bold)
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FormField(label: String, value: String, onValueChange: (String) -> Unit) {
+    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label, color = secondaryColor) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                containerColor = textFieldBackground,
+                focusedBorderColor = primaryColor,
+                unfocusedBorderColor = secondaryColor,
+                cursorColor = primaryColor
+            ),
+            textStyle = TextStyle(color = Color.Black)
+        )
     }
 }
