@@ -34,8 +34,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.bemajudar.data.firebase.saveEventToFirebase
 import com.example.bemajudar.data.firebase.fetchVolunteers
+import com.example.bemajudar.data.firebase.saveEvent
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
 
 
@@ -121,10 +121,10 @@ fun CreateEventScreen(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                 ) {
                     Checkbox(
-                        checked = selectedVolunteers.contains(volunteer.id),
+                        checked = selectedVolunteers.contains(volunteer.email),
                         onCheckedChange = {
-                            if (it) selectedVolunteers.add(volunteer.id)
-                            else selectedVolunteers.remove(volunteer.id)
+                            if (it) selectedVolunteers.add(volunteer.email)
+                            else selectedVolunteers.remove(volunteer.email)
                         }
                     )
                     Text(volunteer.name)
@@ -137,7 +137,7 @@ fun CreateEventScreen(
         // Botão para Criar Evento
         Button(
             onClick = {
-                saveEventToFirebase(eventName, eventDescription, "$eventDate $eventTime", selectedVolunteers)
+                saveEvent(eventName, eventDescription, "$eventDate $eventTime", selectedVolunteers)
             },
             modifier = Modifier.fillMaxWidth()
         ) {

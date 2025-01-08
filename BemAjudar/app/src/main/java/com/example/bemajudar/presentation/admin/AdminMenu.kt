@@ -20,12 +20,16 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.Icons
 import androidx.navigation.NavHostController
 import com.example.bemajudar.R
+import com.example.bemajudar.presentation.viewmodels.UserViewModel
 
 
 @Composable
 fun AdminMenu(
-    navController: NavHostController
+    navController: NavHostController,
+    userViewModel: UserViewModel
 ) {
+    val adminName = userViewModel.name
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -85,7 +89,7 @@ fun AdminMenu(
 
         // Mensagem de boas-vindas
         Text(
-            text = "Bem-Vindo de Volta, Gestor!",
+            text = "Bem-Vindo de Volta, $adminName!",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )

@@ -46,7 +46,7 @@ fun registerUser(
         }
 }
 
-fun saveEventToFirebase(
+fun saveEvent(
     name: String,
     description: String,
     date: String,
@@ -66,13 +66,15 @@ fun saveEventToFirebase(
     db.collection("events").document(eventId).set(event)
         .addOnSuccessListener {
             // Criar notificações para os voluntários
-            volunteers.forEach { volunteerId ->
+            volunteers.forEach { volunteerEmail  ->
+                val notificationRef = db.collection("notifications").document()
                 val notification = hashMapOf(
+                    "notificationId" to notificationRef.id,
                     "eventId" to eventId,
-                    "volunteerId" to volunteerId,
+                    "volunteerEmail" to volunteerEmail,
                     "state" to "Pendente"
                 )
-                db.collection("notifications").add(notification)
+                notificationRef.set(notification)
             }
         }
         .addOnFailureListener { e ->
@@ -105,5 +107,64 @@ fun fetchVolunteers(
         }
         .addOnFailureListener { exception ->
             onFailure(exception)
+        }
+}
+
+fun fetchPendingNotifications(userEmail: String, onResult: (List<Map<String, Any>>) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+
+    db.collection("notifications")
+        .whereEqualTo("volunteerEmail", userEmail)
+        .get()
+        .addOnSuccessListener { result ->
+            val notifications = mutableListOf<Map<String, Any>>()
+
+            val pendingFetches = result.documents.size
+            if (pendingFetches == 0) {
+                onResult(emptyList())
+                return@addOnSuccessListener
+            }
+
+            result.documents.forEach { doc ->
+                val notificationId = doc.id
+                val eventId = doc.getString("eventId") ?: ""
+                db.collection("events").document(eventId).get()
+                    .addOnSuccessListener { eventDoc ->
+                        val eventName = eventDoc.getString("name") ?: "Evento Desconhecido"
+                        val eventDate = eventDoc.getString("date")
+                        notifications.add(
+                            mapOf(
+                                "notificationId" to notificationId,
+                                "title" to "Evento: $eventName",
+                                "message" to "Foi convidado a participar neste evento.",
+                                "date" to "Data: $eventDate",
+                                "state" to (doc.getString("state") ?: "Desconhecido")
+                            )
+                        )
+
+                        if (notifications.size == pendingFetches) {
+                            onResult(notifications)
+                        }
+                    }
+                    .addOnFailureListener {
+                        println("Erro ao buscar detalhes do evento: ${it.message}")
+                    }
+            }
+        }
+        .addOnFailureListener {
+            println("Erro ao buscar notificações: ${it.message}")
+        }
+}
+
+fun updateNotificationState(notificationId: String, newState: String) {
+    val db = FirebaseFirestore.getInstance()
+
+    db.collection("notifications").document(notificationId)
+        .update("state", newState)
+        .addOnSuccessListener {
+            println("Estado da notificação atualizado para: $newState")
+        }
+        .addOnFailureListener { e ->
+            println("Erro ao atualizar notificação: ${e.message}")
         }
 }

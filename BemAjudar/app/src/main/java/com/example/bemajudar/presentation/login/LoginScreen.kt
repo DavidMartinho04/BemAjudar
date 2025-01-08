@@ -42,13 +42,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bemajudar.R
+import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (String) -> Unit, // Callback para navegação com base no tipo de utilizador
+    userViewModel: UserViewModel,
+    onLoginSuccess: (String, String) -> Unit, // Callback para navegação com base no tipo de utilizador
     onCreateAccountClick: () -> Unit // Callback para navegação ao ecrã de criação de conta
 ) {
     // Definições de cores para a interface
@@ -170,7 +172,11 @@ fun LoginScreen(
                                         .addOnSuccessListener { document ->
                                             if (document.exists()) {
                                                 val userType = document.getString("userType") ?: "Voluntário"
-                                                onLoginSuccess(userType) // Navega com base no tipo de utilizador
+                                                val userName = document.getString("name") ?: "Voluntário"
+
+                                                userViewModel.name = userName
+
+                                                onLoginSuccess(userType, email) // Navega com base no tipo de utilizador
                                             } else {
                                                 Toast.makeText(
                                                     context,
