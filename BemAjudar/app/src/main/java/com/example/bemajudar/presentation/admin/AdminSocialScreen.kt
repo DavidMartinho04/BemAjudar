@@ -46,13 +46,15 @@ fun SocialAreaAdminScreen(navController: NavHostController) {
             "Criar Evento" to "Criar um novo evento de voluntariado", // Opção: título e subtítulo
             "Gerir Eventos" to "Verificar os eventos que irão decorrer",
             "Gerir Voluntários" to "Verificar os voluntários do sistema",
-            "Criar Visitantes" to "Verificar os visitantes do sistema",
+            "Registar Visitante" to "Registar um novo visitante",
             "Consultar Visitas" to "Listagem de visitas diárias na loja"
         ).forEach { (title, subtitle) -> // Itera por cada par (título e subtítulo) da lista
             Button(
                 onClick = {
                     when (title) {
                         "Gerir Voluntários" -> navController.navigate("volunteerManagement")
+                        "Registar Visitante" -> navController.navigate("createVisitor")
+                        "Consultar Visitas" -> navController.navigate("viewVisitors")
                         "Criar Evento" -> navController.navigate("createEvent")
                         "Gerir Eventos" -> navController.navigate("manageEventsScreen")
                     }

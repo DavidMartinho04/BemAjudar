@@ -20,6 +20,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.navigation.NavController
 import com.example.bemajudar.data.firebase.getVisitorsFromFirestore
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.Alignment
 
 @Composable
 fun ViewVisitorsScreen(navController: NavController) {
@@ -95,21 +96,37 @@ fun ViewVisitorsScreen(navController: NavController) {
 
 @Composable
 fun VisitorCard(visitor: Map<String, Any>) {
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .border(1.dp, Color.LightGray, RoundedCornerShape(16.dp))
-            .padding(16.dp)
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.elevatedCardElevation(6.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Text(
-            text = visitor["name"].toString().uppercase(),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Text("NIF: ${visitor["nif"] ?: "N/A"}")
-        Text("Morada: ${visitor["address"] ?: "N/A"}")
-        Text("Contacto: ${visitor["contact"] ?: "N/A"}")
-        Text("Última Visita: ${visitor["lastVisit"] ?: "N/A"}", fontWeight = FontWeight.SemiBold)
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Título e Ícones Alinhados
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = visitor["name"].toString().uppercase(),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            // Informações adicionais
+            Text("NIF: ${visitor["nif"] ?: "N/A"}")
+            Text("Morada: ${visitor["address"] ?: "N/A"}")
+            Text("Contacto: ${visitor["contact"] ?: "N/A"}")
+            Text("Última Visita: ${visitor["lastVisit"] ?: "N/A"}", fontWeight = FontWeight.SemiBold)
+        }
     }
 }

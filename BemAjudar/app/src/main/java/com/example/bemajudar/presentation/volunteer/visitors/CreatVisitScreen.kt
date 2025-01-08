@@ -1,5 +1,6 @@
 package com.example.bemajudar.presentation.volunteer.visitors
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,11 +10,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.foundation.border
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -23,6 +24,7 @@ import com.example.bemajudar.data.firebase.updateVisitTimeInFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.foundation.border
 
 @Composable
 fun CreateVisitScreen() {
@@ -30,6 +32,7 @@ fun CreateVisitScreen() {
     var selectedVisitors by remember { mutableStateOf<MutableSet<String>>(mutableSetOf()) }
     var isRegisteringVisit by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
+    val context = LocalContext.current // Para exibir o Toast
 
     // Carregar visitantes ao iniciar o ecrã
     LaunchedEffect(Unit) {
@@ -57,6 +60,7 @@ fun CreateVisitScreen() {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
+        // Barra de pesquisa com cursor azul
         BasicTextField(
             value = searchText,
             onValueChange = { searchText = it },
@@ -80,7 +84,7 @@ fun CreateVisitScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botão para iniciar ou concluir registo de visita
+        // Botão de registo de visitas
         Button(
             onClick = {
                 isRegisteringVisit = !isRegisteringVisit
@@ -89,6 +93,7 @@ fun CreateVisitScreen() {
                     selectedVisitors.forEach { visitorId ->
                         updateVisitTimeInFirestore(visitorId, currentTime)
                     }
+                    Toast.makeText(context, "Visita registada com sucesso!", Toast.LENGTH_SHORT).show()
                     selectedVisitors.clear()
                 }
             },
@@ -109,45 +114,53 @@ fun CreateVisitScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Lista de visitantes filtrada com Checkboxes
+        // Lista de visitantes com Card e Checkboxes
         LazyColumn {
             items(filteredVisitors) { visitor ->
                 val visitorId = visitor["id"].toString()
                 var isChecked by remember { mutableStateOf(selectedVisitors.contains(visitorId)) }
 
-                Row(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .border(1.dp, Color.LightGray, RoundedCornerShape(16.dp))
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.elevatedCardElevation(6.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
-                    if (isRegisteringVisit) {
-                        Checkbox(
-                            checked = isChecked,
-                            onCheckedChange = {
-                                isChecked = it
-                                if (it) selectedVisitors.add(visitorId)
-                                else selectedVisitors.remove(visitorId)
-                            },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = Color(0xFF025997), // Checkbox a azul
-                                uncheckedColor = Color.Gray
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (isRegisteringVisit) {
+                            Checkbox(
+                                checked = isChecked,
+                                onCheckedChange = {
+                                    isChecked = it
+                                    if (it) selectedVisitors.add(visitorId)
+                                    else selectedVisitors.remove(visitorId)
+                                },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Color(0xFF025997),
+                                    uncheckedColor = Color.Gray
+                                )
                             )
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
+                        }
 
-                    Column {
-                        Text(
-                            text = visitor["name"].toString().uppercase(),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        Text("NIF: ${visitor["nif"] ?: "N/A"}")
-                        Text("Morada: ${visitor["address"] ?: "N/A"}")
-                        Text("Contacto: ${visitor["contact"] ?: "N/A"}")
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Column {
+                            Text(
+                                text = visitor["name"].toString().uppercase(),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
+                            Text("NIF: ${visitor["nif"] ?: "N/A"}")
+                            Text("Morada: ${visitor["address"] ?: "N/A"}")
+                            Text("Contacto: ${visitor["contact"] ?: "N/A"}")
+                        }
                     }
                 }
             }
