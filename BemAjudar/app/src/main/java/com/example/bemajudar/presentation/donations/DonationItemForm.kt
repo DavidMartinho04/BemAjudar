@@ -56,7 +56,7 @@ fun DonationItemForm(
 ) {
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
-    val itemTypes = listOf("Vestuário", "Eletrónica", "Mobilia", "Outro")
+    val itemTypes = listOf("Alimentação", "Vestuário", "Eletrónica", "Mobilia", "Higiene", "Brinquedos", "Outro")
     val blueColor = Color(0xFF025997)
 
     // Controlador para o seletor de imagens
