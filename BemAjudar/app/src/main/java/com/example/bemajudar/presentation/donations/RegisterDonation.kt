@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.bemajudar.data.firebase.sendDonationToFirestore
 import com.example.bemajudar.domain.model.DonationItem
 import com.example.bemajudar.presentation.createaccount.uploadPhotoToFirebaseStorage
 import java.util.Calendar
