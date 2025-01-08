@@ -1,49 +1,105 @@
 package com.example.bemajudar.data.firebase
 
+import android.content.Context
+import android.widget.Toast
+import com.example.bemajudar.data.AppDatabase
+import com.example.bemajudar.data.local.UserEntity
+import com.example.bemajudar.presentation.createaccount.hashPassword
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
+import com.example.bemajudar.utils.isInternetAvailable
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.UUID
 
 fun registerUser(
-    userViewModel: UserViewModel, // ViewModel que contém os dados do utilizador
-    onSuccess: () -> Unit, // Callback para executar em caso de sucesso
-    onFailure: (Exception) -> Unit // Callback para executar em caso de falha
+    context: Context,
+    userViewModel: UserViewModel,
+    onSuccess: () -> Unit,
+    onFailure: (Exception) -> Unit
 ) {
-    val auth = FirebaseAuth.getInstance() // Obtem a instância do Firebase Authentication
-    val db = FirebaseFirestore.getInstance() // Obtem a instância do Firestore
+    val auth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
+    val roomDb = AppDatabase.getDatabase(context)
 
-    // Criação do utilizador no Firebase Authentication
-    auth.createUserWithEmailAndPassword(userViewModel.email, userViewModel.password)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val userId = task.result?.user?.uid // Obtem o UID do utilizador criado
+    // Gera o authToken e faz o hash da password usando SHA-256
+    val authToken = UUID.randomUUID().toString()
+    val hashedPassword = hashPassword(userViewModel.password)
+    val plainPassword = userViewModel.password // ✅ Guarda a password original também.
 
-                // Dados do utilizador a serem guardados no Firestore
-                val userData = mapOf(
-                    "id" to userId, // ID único do utilizador
-                    "photoUrl" to (userViewModel.photoUrl ?: ""), // URL da imagem de perfil
-                    "name" to userViewModel.name, // Nome do utilizador
-                    "birthDate" to userViewModel.birthDate, // Data de nascimento
-                    "phone" to userViewModel.phone, // Número de telemóvel
-                    "email" to userViewModel.email, // Endereço de email
-                    "address" to userViewModel.address, // Morada do utilizador
-                    "postalCode" to userViewModel.postalCode, // Código postal
-                    "gender" to userViewModel.gender, // Género do utilizador
-                    "userType" to userViewModel.userType // Tipo de utilizador (Gestor ou Voluntário)
-                )
+    if (isInternetAvailable(context)) {
+        auth.createUserWithEmailAndPassword(userViewModel.email, plainPassword)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val userId = task.result?.user?.uid ?: return@addOnCompleteListener
 
-                userId?.let {
-                    // Guarda os dados no Firestore, na coleção "users", com o UID como documento
-                    db.collection("users").document(it)
-                        .set(userData) // Adiciona os dados do utilizador
-                        .addOnSuccessListener { onSuccess() } // Chama o callback de sucesso
-                        .addOnFailureListener { e -> onFailure(e) } // Chama o callback de falha com a exceção
+                    // Dados para enviar ao Firestore (com a password hasheada)
+                    val userData = mapOf(
+                        "id" to userId,
+                        "name" to userViewModel.name,
+                        "email" to userViewModel.email,
+                        "photoUrl" to (userViewModel.photoUrl ?: ""),
+                        "phone" to userViewModel.phone,
+                        "address" to userViewModel.address,
+                        "postalCode" to userViewModel.postalCode,
+                        "gender" to userViewModel.gender,
+                        "userType" to userViewModel.userType,
+                        "authToken" to hashedPassword
+                    )
+
+                    db.collection("users").document(userId).set(userData)
+                        .addOnSuccessListener {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val userEntity = UserEntity(
+                                    id = userId,
+                                    name = userViewModel.name,
+                                    email = userViewModel.email,
+                                    photoUrl = userViewModel.photoUrl ?: "",
+                                    phone = userViewModel.phone,
+                                    address = userViewModel.address,
+                                    postalCode = userViewModel.postalCode,
+                                    gender = userViewModel.gender,
+                                    userType = userViewModel.userType,
+                                    authToken = hashedPassword,
+                                    isSynced = true,
+                                    plainPassword = plainPassword // ✅ Guarda a original no Room para sincronização futura
+                                )
+                                roomDb.userDao().insertUser(userEntity)
+                                withContext(Dispatchers.Main) { onSuccess() }
+                            }
+                        }
+                        .addOnFailureListener { e -> onFailure(e) }
+                } else {
+                    onFailure(task.exception ?: Exception("Erro ao criar utilizador no Firebase."))
                 }
-            } else {
-                // Caso a criação do utilizador falhe, chama o callback de falha com a exceção
-                onFailure(task.exception ?: Exception("Erro desconhecido ao criar utilizador."))
+            }
+    } else {
+        // ✅ Caso offline, guarda a password original e hasheada no Room
+        CoroutineScope(Dispatchers.IO).launch {
+            val userEntity = UserEntity(
+                id = authToken,
+                name = userViewModel.name,
+                email = userViewModel.email,
+                photoUrl = userViewModel.photoUrl ?: "",
+                phone = userViewModel.phone,
+                address = userViewModel.address,
+                postalCode = userViewModel.postalCode,
+                gender = userViewModel.gender,
+                userType = userViewModel.userType,
+                authToken = hashedPassword,
+                plainPassword = plainPassword, // ✅ Guarda a original
+                isSynced = false
+            )
+            roomDb.userDao().insertUser(userEntity)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Utilizador guardado offline. Sincronizará quando online.", Toast.LENGTH_LONG).show()
+                onSuccess()
             }
         }
+    }
 }
 
 fun addVisitorToFirestore(

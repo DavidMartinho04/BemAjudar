@@ -19,9 +19,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 
 @Composable
-fun DonationsAreaAdminScreen() {
+fun DonationsAreaAdminScreen(navController: NavHostController) {
     // Estrutura principal da interface para a área de doações do administrador
     Column(
         modifier = Modifier
@@ -48,7 +49,12 @@ fun DonationsAreaAdminScreen() {
             "Consultar Levantamentos" to "Listagem de levantamentos efetuados"
         ).forEach { (title, subtitle) -> // Itera por cada par (título e subtítulo) da lista
             Button(
-                onClick = { /* Navegação futura */ }, // Ação a ser executada quando o botão for clicado
+                onClick = {
+                    when (title) {
+                        "Registar Doação" -> navController.navigate("registerDonation")
+                        // Outros casos podem ser adicionados aqui
+                    }
+                }, // Ação executada ao clicar no botão
                 modifier = Modifier
                     .fillMaxWidth() // Botão ocupa toda a largura disponível
                     .height(100.dp) // Altura do botão

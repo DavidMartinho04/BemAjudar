@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -27,6 +28,7 @@ import com.example.bemajudar.presentation.admin.VolunteerDetailScreen
 import com.example.bemajudar.presentation.admin.VolunteerManagementScreen
 import com.example.bemajudar.presentation.createaccount.CreateAccountScreen
 import com.example.bemajudar.presentation.createaccount.FinalizeAccountScreen
+import com.example.bemajudar.presentation.donations.DonationFormScreen
 import com.example.bemajudar.presentation.login.LoginScreen
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.example.bemajudar.presentation.volunteer.DonationsAreaVolunteerScreen
@@ -58,7 +60,10 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                 showBottomNav.value = false
                 LoginScreen(
                     onLoginSuccess = { userType ->
+                        // Define o tipo de utilizador no UserViewModel
                         userViewModel.userType = userType
+
+                        // Navega para o menu correto com base no tipo de utilizador
                         if (userType == "Gestor") {
                             navController.navigate("menuAdmin")
                         } else {
@@ -67,10 +72,12 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                         showBottomNav.value = true
                     },
                     onCreateAccountClick = {
+                        // Navega para o ecrã de criação de conta
                         navController.navigate("createAccount")
                     }
                 )
             }
+
 
             // Ecrã de Criação de Conta
             composable("createAccount") {
@@ -104,9 +111,9 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
             }
             composable("donationsAdmin") {
                 showBottomNav.value = true
-                DonationsAreaAdminScreen()
+                DonationsAreaAdminScreen(navController = navController)
             }
-            // Nova rota para Gerir Voluntários
+            // Gerir Voluntários
             composable("volunteerManagement") {
                 showBottomNav.value = true
                 VolunteerManagementScreen(navController = navController) // Chama o ecrã de gestão de voluntários
@@ -115,6 +122,13 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                 val volunteerId = backStackEntry.arguments?.getString("volunteerId") ?: ""
                 VolunteerDetailScreen(volunteerId = volunteerId)
             }
+
+            composable("registerDonation") {
+                val context = LocalContext.current
+                showBottomNav.value = true
+                DonationFormScreen(context = context)
+            }
+
             // Ecrãs do Voluntário
             composable("menuVolunteer") {
                 showBottomNav.value = true

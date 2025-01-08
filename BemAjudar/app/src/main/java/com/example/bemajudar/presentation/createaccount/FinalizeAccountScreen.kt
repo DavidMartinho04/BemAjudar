@@ -65,7 +65,6 @@ fun FinalizeAccountScreen(
 
     // Contexto para exibir Toasts
     val context = LocalContext.current
-
     Column(
         modifier = Modifier
             .padding(20.dp),
@@ -245,8 +244,9 @@ fun FinalizeAccountScreen(
                         userType = userType
                     )
 
-                    // Regista o utilizador no Firebase
+                    // Regista o utilizador no Firebase e no Room
                     registerUser(
+                        context = context,
                         userViewModel = userViewModel,
                         onSuccess = {
                             Toast.makeText(context, "Conta criada com sucesso!", Toast.LENGTH_SHORT).show()
