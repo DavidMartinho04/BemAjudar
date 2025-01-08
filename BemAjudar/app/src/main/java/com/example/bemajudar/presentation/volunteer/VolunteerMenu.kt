@@ -147,37 +147,7 @@ fun VolunteerMenu(
         // Últimas Doações
         Text("Últimas Doações", fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(8.dp))
-        RecentDonationsSection()
+
     }
 }
 
-@Composable
-fun RecentDonationsSection() {
-    val donations = listOf(
-        "CHUTEIRAS ADIDAS N41 - Data: 11/12/2024",
-        "CASACO SÃO PAULO XL - Data: 13/12/2024"
-    )
-
-    Column {
-        donations.forEach { donation ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.donation),
-                    contentDescription = "Donation Icon",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color.LightGray)
-                        .padding(8.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(donation)
-            }
-        }
-    }
-}
