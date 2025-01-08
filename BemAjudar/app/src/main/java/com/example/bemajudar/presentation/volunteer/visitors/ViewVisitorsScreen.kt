@@ -5,7 +5,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.TextStyle
 import androidx.navigation.NavController
 import com.example.bemajudar.data.firebase.getVisitorsFromFirestore
+import androidx.compose.ui.graphics.SolidColor
 
 @Composable
 fun ViewVisitorsScreen(navController: NavController) {
@@ -56,22 +56,22 @@ fun ViewVisitorsScreen(navController: NavController) {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Barra de Pesquisa com Placeholder
         BasicTextField(
             value = searchText,
             onValueChange = { searchText = it },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
-                .background(Color.LightGray, shape = RoundedCornerShape(16.dp))
+                .border(1.dp, Color.Gray, RoundedCornerShape(16.dp))
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = {}),
+            keyboardActions = KeyboardActions(onSearch = { }),
             textStyle = TextStyle(color = Color.Black),
+            cursorBrush = SolidColor(Color(0xFF025997)),
             decorationBox = { innerTextField ->
                 if (searchText.isEmpty()) {
-                    Text("Pesquisar por nome...", color = Color.Gray, fontSize = 16.sp)
+                    Text("Pesquisar por nome...", color = Color.Gray)
                 }
                 innerTextField()
             }

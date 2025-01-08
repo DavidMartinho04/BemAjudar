@@ -6,11 +6,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.compose.ui.text.input.VisualTransformation
 import com.example.bemajudar.data.firebase.addVisitorToFirestore
 
 val primaryColor = Color(0xFF025997)
@@ -55,11 +55,13 @@ fun CreateVisitorScreen(navController: NavController) {
                     errorMessage = "Preencha todos os campos obrigatórios."
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
         ) {
-            Text("Guardar Visitante", fontSize = 18.sp, color = Color.White)
+            Text("Guardar Visitante", fontSize = 18.sp, color = Color.White, fontWeight = FontWeight.Bold)
         }
 
         errorMessage?.let {
@@ -68,16 +70,26 @@ fun CreateVisitorScreen(navController: NavController) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormField(label: String, value: String, onValueChange: (String) -> Unit) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Text(text = label, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            label = { Text(label) },
+            label = { Text(label, color = secondaryColor) },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                containerColor = textFieldBackground,
+                focusedBorderColor = primaryColor,
+                unfocusedBorderColor = secondaryColor,
+                focusedLabelColor = secondaryColor,
+                unfocusedLabelColor = secondaryColor,
+                cursorColor = primaryColor
+            ),
+            textStyle = TextStyle(color = Color.Black) // Definindo o texto como sempre preto
         )
     }
 }

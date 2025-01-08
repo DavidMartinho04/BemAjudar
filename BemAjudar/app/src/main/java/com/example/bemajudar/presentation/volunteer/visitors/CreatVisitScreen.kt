@@ -22,6 +22,7 @@ import com.example.bemajudar.data.firebase.getVisitorsFromFirestore
 import com.example.bemajudar.data.firebase.updateVisitTimeInFirestore
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.ui.graphics.SolidColor
 
 @Composable
 fun CreateVisitScreen() {
@@ -56,7 +57,6 @@ fun CreateVisitScreen() {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Campo de Pesquisa por Nome
         BasicTextField(
             value = searchText,
             onValueChange = { searchText = it },
@@ -69,6 +69,7 @@ fun CreateVisitScreen() {
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = { }),
             textStyle = TextStyle(color = Color.Black),
+            cursorBrush = SolidColor(Color(0xFF025997)),
             decorationBox = { innerTextField ->
                 if (searchText.isEmpty()) {
                     Text("Pesquisar por nome...", color = Color.Gray)
@@ -129,7 +130,11 @@ fun CreateVisitScreen() {
                                 isChecked = it
                                 if (it) selectedVisitors.add(visitorId)
                                 else selectedVisitors.remove(visitorId)
-                            }
+                            },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = Color(0xFF025997), // Checkbox a azul
+                                uncheckedColor = Color.Gray
+                            )
                         )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
