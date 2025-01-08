@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bemajudar.R
+import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.example.bemajudar.data.AppDatabase
 import com.example.bemajudar.presentation.createaccount.hashPassword
 import com.example.bemajudar.utils.isInternetAvailable
@@ -55,7 +56,8 @@ import kotlinx.coroutines.withContext
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (String) -> Unit, // Callback para navegação com base no tipo de utilizador
+    userViewModel: UserViewModel,
+    onLoginSuccess: (String, String) -> Unit, // Callback para navegação com base no tipo de utilizador
     onCreateAccountClick: () -> Unit // Callback para navegação ao ecrã de criação de conta
 ) {
     // Definições de cores para a interface
@@ -71,7 +73,6 @@ fun LoginScreen(
 
     // Inicializa Firebase Auth e Firestore
     val context = LocalContext.current
-    val roomDb = AppDatabase.getDatabase(context)
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
 
@@ -168,50 +169,42 @@ fun LoginScreen(
         Button(
             onClick = {
                 if (email.isNotEmpty() && password.isNotEmpty()) {
-                    val isConnected = isInternetAvailable(context)
+                    auth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val uid = auth.currentUser?.uid
+                                if (uid != null) {
+                                    // Verifica o tipo de utilizador no Firestore
+                                    db.collection("users").document(uid).get()
+                                        .addOnSuccessListener { document ->
+                                            if (document.exists()) {
+                                                val userType = document.getString("userType") ?: "Voluntário"
+                                                val userName = document.getString("name") ?: "Voluntário"
 
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val roomDb = AppDatabase.getDatabase(context)
-                        val auth = FirebaseAuth.getInstance()
-                        val db = FirebaseFirestore.getInstance()
+                                                userViewModel.name = userName
 
-                        if (!isConnected) {
-                            // 🔒 Login OFFLINE usando a password inserida comparada com a hash no Room
-                            val localUser = roomDb.userDao().getUserByEmail(email)
-                            val hashedPassword = hashPassword(password)
-                            withContext(Dispatchers.Main) {
-                                if (localUser != null && localUser.authToken == hashedPassword) {
-                                    onLoginSuccess(localUser.userType)
-                                } else {
-                                    Toast.makeText(context, "Palavra-passe incorreta (offline).", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        } else {
-                            // 🔑 Login ONLINE usando Firebase Authentication
-                            auth.signInWithEmailAndPassword(email, password)
-                                .addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        val uid = auth.currentUser?.uid
-                                        if (uid != null) {
-                                            db.collection("users").document(uid).get()
-                                                .addOnSuccessListener { document ->
-                                                    if (document.exists()) {
-                                                        val userType = document.getString("userType") ?: "Voluntário"
-                                                        onLoginSuccess(userType)
-                                                    } else {
-                                                        Toast.makeText(context, "Utilizador não encontrado (online).", Toast.LENGTH_SHORT).show()
-                                                    }
-                                                }
-                                                .addOnFailureListener {
-                                                    Toast.makeText(context, "Erro ao buscar utilizador no Firestore.", Toast.LENGTH_SHORT).show()
-                                                }
+                                                onLoginSuccess(userType, email) // Navega com base no tipo de utilizador
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Utilizador não encontrado!",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
                                         }
-                                    } else {
-                                        Toast.makeText(context, "Erro no login: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
-                                    }
+                                        .addOnFailureListener {
+                                            Toast.makeText(
+                                                context,
+                                                "Erro ao buscar utilizador: ${translateFirebaseError(it.message)}",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
                                 }
+                            } else {
+                                val errorMessage = translateFirebaseError(task.exception?.message)
+                                Toast.makeText(context, "Erro no login: $errorMessage", Toast.LENGTH_SHORT).show()
+                            }
                         }
-                    }
                 } else {
                     Toast.makeText(context, "Por favor, preencha todos os campos!", Toast.LENGTH_SHORT).show()
                 }

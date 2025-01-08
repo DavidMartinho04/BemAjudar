@@ -36,7 +36,6 @@ fun SocialAreaVolunteerScreen(navController: NavController) {
         // Lista de botões com ações corrigidas
         listOf(
             "Registar Visitante" to "Registar um novo visitante",
-            "Gerir Eventos" to "Verificar os eventos que irão decorrer",
             "Gerir Visitantes" to "Verificar os visitantes do sistema",
             "Registar Visitas" to "Listar visitantes e registar visitas",
             "Consultar Visitas" to "Listar visitas com data de visita"
