@@ -34,10 +34,10 @@ import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.example.bemajudar.presentation.volunteer.DonationsAreaVolunteerScreen
 import com.example.bemajudar.presentation.volunteer.SocialAreaVolunteerScreen
 import com.example.bemajudar.presentation.volunteer.VolunteerMenu
-import com.example.bemajudar.presentation.volunteer.visitors.CreateVisitorScreen
-import com.example.bemajudar.presentation.volunteer.visitors.ViewVisitorsScreen
 import com.example.bemajudar.presentation.volunteer.visitors.CreateVisitScreen
+import com.example.bemajudar.presentation.volunteer.visitors.CreateVisitorScreen
 import com.example.bemajudar.presentation.volunteer.visitors.ManageVisitorsScreen
+import com.example.bemajudar.presentation.volunteer.visitors.ViewVisitorsScreen
 
 @Composable
 fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel) {
@@ -52,7 +52,7 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "login",
+            startDestination = "menuAdmin",
             modifier = Modifier.padding(innerPadding)
         ) {
             // Ecrã de Login

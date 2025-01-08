@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.bemajudar.data.firebase.sendDonationToFirestore
 import com.example.bemajudar.domain.model.DonationItem
 import com.example.bemajudar.presentation.createaccount.uploadPhotoToFirebaseStorage
 import java.util.Calendar
@@ -174,7 +175,7 @@ fun DonationFormScreen(context: Context) {
                     }
                 }
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
         }
 
         // Botão de Adicionar Novo Item
@@ -186,7 +187,7 @@ fun DonationFormScreen(context: Context) {
             Icon(Icons.Default.Add, contentDescription = "Adicionar Item", tint = blueColor, modifier = Modifier.size(25.dp))
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(25.dp))
 
         // Botão de Submeter Doação com validação, upload, envio e reset dos cards
         Button(
