@@ -34,6 +34,10 @@ import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.example.bemajudar.presentation.volunteer.DonationsAreaVolunteerScreen
 import com.example.bemajudar.presentation.volunteer.SocialAreaVolunteerScreen
 import com.example.bemajudar.presentation.volunteer.VolunteerMenu
+import com.example.bemajudar.presentation.volunteer.visitors.CreateVisitorScreen
+import com.example.bemajudar.presentation.volunteer.visitors.ViewVisitorsScreen
+import com.example.bemajudar.presentation.volunteer.visitors.CreateVisitScreen
+import com.example.bemajudar.presentation.volunteer.visitors.ManageVisitorsScreen
 
 @Composable
 fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel) {
@@ -130,13 +134,29 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                 showBottomNav.value = true
                 VolunteerMenu()
             }
-            composable("socialVolunteer") {
+            composable(route = "socialVolunteer") {
                 showBottomNav.value = true
-                SocialAreaVolunteerScreen()
+                SocialAreaVolunteerScreen(navController = navController)
             }
             composable("donationsVolunteer") {
                 showBottomNav.value = true
                 DonationsAreaVolunteerScreen()
+            }
+            composable("createVisitor") {
+                showBottomNav.value = true
+                CreateVisitorScreen(navController = navController)
+            }
+            composable("viewVisitors") {
+                showBottomNav.value = true
+                ViewVisitorsScreen(navController)
+            }
+            composable("createVisit") {
+                showBottomNav.value = true
+                CreateVisitScreen()
+            }
+            composable("manageVisitors") {
+                showBottomNav.value = true
+                ManageVisitorsScreen()
             }
         }
     }

@@ -102,3 +102,79 @@ fun registerUser(
     }
 }
 
+fun addVisitorToFirestore(
+    name: String,
+    nif: String,
+    address: String,
+    visitDate: String,
+    contact: String,
+    onSuccess: () -> Unit,
+    onFailure: (Exception) -> Unit
+) {
+    val db = FirebaseFirestore.getInstance()
+    val visitorData = mapOf(
+        "name" to name,
+        "nif" to nif,
+        "address" to address,
+        "contact" to contact,
+        "lastVisit" to visitDate
+    )
+
+    // Gerar um novo documento com um ID automaticamente
+    val newDocRef = db.collection("visitors").document()
+    newDocRef.set(visitorData + ("id" to newDocRef.id)) // Garante que o ID seja armazenado
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { e -> onFailure(e) }
+}
+
+fun getVisitorsFromFirestore(
+    onSuccess: (List<Map<String, Any>>) -> Unit,
+    onFailure: (Exception) -> Unit
+) {
+    val db = FirebaseFirestore.getInstance()
+
+    db.collection("visitors")
+        .get()
+        .addOnSuccessListener { result ->
+            val visitorsList = result.documents.map { document ->
+                val visitorData = document.data ?: emptyMap()
+                visitorData + ("id" to document.id) // Adiciona o ID do documento ao mapa
+            }
+            onSuccess(visitorsList)
+        }
+        .addOnFailureListener { exception ->
+            onFailure(exception)
+        }
+}
+
+fun updateVisitTimeInFirestore(visitorId: String, lastVisit: String) {
+    if (visitorId.isBlank()) {
+        println("Erro: visitorId inválido.")
+        return
+    }
+    val db = FirebaseFirestore.getInstance()
+    db.collection("visitors").document(visitorId)
+        .update("lastVisit", lastVisit)
+        .addOnSuccessListener {
+            println("Hora da última visita atualizada com sucesso!")
+        }
+        .addOnFailureListener { e ->
+            println("Erro ao atualizar a hora da última visita: $e")
+        }
+}
+
+fun updateVisitorData(visitorId: String, updatedData: Map<String, Any>, onSuccess: () -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    db.collection("visitors").document(visitorId)
+        .update(updatedData)
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { e -> println("Erro ao atualizar visitante: $e") }
+}
+
+fun deleteVisitorFromFirestore(visitorId: String, onSuccess: () -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    db.collection("visitors").document(visitorId)
+        .delete()
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { e -> println("Erro ao eliminar visitante: $e") }
+}
