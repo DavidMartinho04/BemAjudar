@@ -266,6 +266,7 @@ fun DonationFormScreen(context: Context) {
                 fontSize = 16.sp
             )
         }
+        Spacer(modifier = Modifier.height(30.dp))
     }
 }
 

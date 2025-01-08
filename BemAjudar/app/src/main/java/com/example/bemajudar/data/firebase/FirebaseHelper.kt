@@ -5,6 +5,7 @@ import android.widget.Toast
 import com.example.bemajudar.data.AppDatabase
 import com.example.bemajudar.data.local.UserEntity
 import com.example.bemajudar.domain.model.DonationItem
+import com.example.bemajudar.domain.model.DonationItemDetail
 import com.example.bemajudar.presentation.createaccount.hashPassword
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.example.bemajudar.utils.isInternetAvailable
@@ -14,6 +15,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 
 fun registerUser(
@@ -212,4 +216,59 @@ fun deleteVisitorFromFirestore(visitorId: String, onSuccess: () -> Unit) {
         .delete()
         .addOnSuccessListener { onSuccess() }
         .addOnFailureListener { e -> println("Erro ao eliminar visitante: $e") }
+}
+
+fun registerLevantamento(visitorId: String, selectedItems: List<DonationItemDetail>) {
+    val db = FirebaseFirestore.getInstance()
+    val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+
+    selectedItems.forEach { item ->
+        // Adicionar o levantamento à coleção 'levantamentos'
+        val levantamento = mapOf(
+            "visitorId" to visitorId,
+            "name" to item.name,
+            "description" to item.description,
+            "quantity" to item.quantity,
+            "type" to item.type,
+            "dateLevantamento" to currentDate
+        )
+
+        db.collection("levantamentos")
+            .add(levantamento)
+            .addOnSuccessListener {
+                println("Levantamento registado com sucesso!")
+            }
+            .addOnFailureListener { e ->
+                println("Erro ao registar o levantamento: ${e.message}")
+            }
+
+        // **Remover o item correspondente da coleção 'donations'**
+        db.collection("donations")
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    val itemsList = document.get("items") as? MutableList<Map<String, Any>> ?: mutableListOf()
+
+                    // Remover o item específico da lista de itens
+                    val updatedItems = itemsList.filterNot {
+                        it["name"] == item.name &&
+                                it["description"] == item.description &&
+                                (it["quantity"] as Long).toInt() == item.quantity
+                    }
+
+                    // Atualizar a lista no Firestore
+                    db.collection("donations").document(document.id)
+                        .update("items", updatedItems)
+                        .addOnSuccessListener {
+                            println("Item removido com sucesso!")
+                        }
+                        .addOnFailureListener { e ->
+                            println("Erro ao remover o item: ${e.message}")
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                println("Erro ao aceder à coleção 'donations': ${e.message}")
+            }
+    }
 }

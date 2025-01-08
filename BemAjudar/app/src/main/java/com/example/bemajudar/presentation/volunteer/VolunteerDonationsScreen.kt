@@ -19,9 +19,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 
 @Composable
-fun DonationsAreaVolunteerScreen() {
+fun DonationsAreaVolunteerScreen(navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -46,7 +47,14 @@ fun DonationsAreaVolunteerScreen() {
             "Gerir Itens" to "Verificar os itens do inventário"
         ).forEach { (title, subtitle) ->
             Button(
-                onClick = { /* Aqui será implementada a navegação ou funcionalidade correspondente */ },
+                onClick = {
+                    when (title) {
+                        "Registar Levantamento" -> navController.navigate("levantamentos")
+                        "Gerir Doações" -> navController.navigate("listDonations")
+                        "Gerir Itens" -> navController.navigate("listItems")
+                        "Consultar Levantamentos" -> navController.navigate("levantamentos")
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(100.dp) // Altura personalizada para os botões

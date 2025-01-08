@@ -1,4 +1,4 @@
-package com.example.bemajudar.presentation.admin
+package com.example.bemajudar.presentation.pickups
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,34 +28,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.bemajudar.domain.model.DonationItemSimple
-import com.example.bemajudar.presentation.donations.DonationCard
+import com.example.bemajudar.domain.model.PickupItem
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun DonationListScreen() {
+fun LevantamentoListScreen() {
     var searchQuery by remember { mutableStateOf("") }
-    val donations = remember { mutableStateListOf<DonationItemSimple>() }
+    val pickups = remember { mutableStateListOf<PickupItem>() }
     val db = FirebaseFirestore.getInstance()
 
     // Atualização em tempo real com SnapshotListener
     LaunchedEffect(Unit) {
-        db.collection("donations")
+        db.collection("levantamentos")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     error.printStackTrace()
                     return@addSnapshotListener
                 }
                 if (snapshot != null && !snapshot.isEmpty) {
-                    donations.clear()
+                    pickups.clear()
                     for (document in snapshot.documents) {
-                        val donation = DonationItemSimple(
-                            id = document.id,
-                            deliveryDate = document.getString("deliveryDate") ?: "Data Indisponível",
-                            description = document.getString("donationDescription") ?: "Sem descrição",
-                            donorName = document.getString("donorName") ?: "Doador Desconhecido"
+                        val pickup = PickupItem(
+                            dateLevantamento = document.getString("dateLevantamento") ?: "Data Indisponível",
+                            name = document.getString("name") ?: "Sem Nome",
+                            description = document.getString("description") ?: "Sem Descrição",
+                            quantity = (document.getLong("quantity") ?: 0).toInt(),
+                            type = document.getString("type") ?: "Sem Tipo",
+                            visitorId = document.getString("visitorId") ?: "N/A"
                         )
-                        donations.add(donation)
+                        pickups.add(pickup)
                     }
                 }
             }
@@ -67,7 +70,7 @@ fun DonationListScreen() {
         // Título
         Spacer(modifier = Modifier.height(30.dp))
         Text(
-            text = "Gerir Doações",
+            text = "Levantamentos Realizados",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black
@@ -85,7 +88,7 @@ fun DonationListScreen() {
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Procure Aqui...") },
+                placeholder = { Text("Procurar Levantamento...") },
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
                     .weight(1f)
@@ -95,30 +98,32 @@ fun DonationListScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Lista de doações filtrada em tempo real
+        // Lista de levantamentos com filtro em tempo real
         LazyColumn {
-            items(donations.filter {
-                it.donorName.contains(searchQuery, ignoreCase = true) ||
-                        it.description.contains(searchQuery, ignoreCase = true)
-            }) { donation ->
-                DonationCard(
-                    donation = donation,
-                    onEdit = { updatedData ->
-                        db.collection("donations").document(donation.id)
-                            .update(
-                                mapOf(
-                                    "deliveryDate" to updatedData.deliveryDate,
-                                    "donationDescription" to updatedData.description,
-                                    "donorName" to updatedData.donorName
-                                )
-                            )
-                    },
-                    onDelete = {
-                        db.collection("donations").document(donation.id).delete()
-                        donations.remove(donation)
+            items(pickups.filter {
+                it.name.contains(searchQuery, ignoreCase = true) ||
+                        it.description.contains(searchQuery, ignoreCase = true) ||
+                        it.visitorId.contains(searchQuery, ignoreCase = true)
+            }) { pickup ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Text("Data: ${pickup.dateLevantamento}", fontWeight = FontWeight.Bold)
+                        Text("Nome: ${pickup.name}")
+                        Text("Descrição: ${pickup.description}")
+                        Text("Quantidade: ${pickup.quantity}")
+                        Text("Tipo: ${pickup.type}")
                     }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+                }
             }
         }
     }

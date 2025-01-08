@@ -52,6 +52,9 @@ fun DonationsAreaAdminScreen(navController: NavHostController) {
                 onClick = {
                     when (title) {
                         "Registar Doação" -> navController.navigate("registerDonation")
+                        "Gerir Doações" -> navController.navigate("listDonations")
+                        "Gerir Itens" -> navController.navigate("listItems")
+
                         // Outros casos podem ser adicionados aqui
                     }
                 }, // Ação executada ao clicar no botão

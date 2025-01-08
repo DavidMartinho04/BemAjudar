@@ -22,6 +22,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.bemajudar.presentation.admin.AdminMenu
+import com.example.bemajudar.presentation.admin.DonationListScreen
 import com.example.bemajudar.presentation.admin.DonationsAreaAdminScreen
 import com.example.bemajudar.presentation.admin.SocialAreaAdminScreen
 import com.example.bemajudar.presentation.admin.VolunteerDetailScreen
@@ -29,7 +30,10 @@ import com.example.bemajudar.presentation.admin.VolunteerManagementScreen
 import com.example.bemajudar.presentation.createaccount.CreateAccountScreen
 import com.example.bemajudar.presentation.createaccount.FinalizeAccountScreen
 import com.example.bemajudar.presentation.donations.DonationFormScreen
+import com.example.bemajudar.presentation.donations.items.DonationItemsListScreen
 import com.example.bemajudar.presentation.login.LoginScreen
+import com.example.bemajudar.presentation.pickups.LevantamentoFlowScreen
+import com.example.bemajudar.presentation.pickups.LevantamentoListScreen
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.example.bemajudar.presentation.volunteer.DonationsAreaVolunteerScreen
 import com.example.bemajudar.presentation.volunteer.SocialAreaVolunteerScreen
@@ -52,7 +56,7 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "menuAdmin",
+            startDestination = "login",
             modifier = Modifier.padding(innerPadding)
         ) {
             // Ecrã de Login
@@ -78,7 +82,6 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                 )
             }
 
-
             // Ecrã de Criação de Conta
             composable("createAccount") {
                 showBottomNav.value = false
@@ -88,6 +91,11 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                     },
                     userViewModel = userViewModel
                 )
+            }
+
+            // Fluxo de Levantamentos com múltiplos ecrãs
+            composable("levantamentos") {
+                LevantamentoFlowScreen()
             }
 
             // Ecrã de Finalização da Conta
@@ -122,13 +130,22 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                 val volunteerId = backStackEntry.arguments?.getString("volunteerId") ?: ""
                 VolunteerDetailScreen(volunteerId = volunteerId)
             }
-
+            // Gerir Doações
+            composable("listDonations") {
+                showBottomNav.value = true
+                DonationListScreen()
+            }
+            // Gerir Itens
+            composable("listItems") {
+                showBottomNav.value = true
+                DonationItemsListScreen()
+            }
+            // Registar Doações
             composable("registerDonation") {
                 val context = LocalContext.current
                 showBottomNav.value = true
                 DonationFormScreen(context = context)
             }
-
             // Ecrãs do Voluntário
             composable("menuVolunteer") {
                 showBottomNav.value = true
@@ -140,7 +157,7 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
             }
             composable("donationsVolunteer") {
                 showBottomNav.value = true
-                DonationsAreaVolunteerScreen()
+                DonationsAreaVolunteerScreen(navController = navController)
             }
             composable("createVisitor") {
                 showBottomNav.value = true
@@ -149,6 +166,10 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
             composable("viewVisitors") {
                 showBottomNav.value = true
                 ViewVisitorsScreen(navController)
+            }
+            // ✅ Rota para a Listagem de Levantamentos
+            composable("levantamentos") {
+                LevantamentoListScreen()
             }
             composable("createVisit") {
                 showBottomNav.value = true
