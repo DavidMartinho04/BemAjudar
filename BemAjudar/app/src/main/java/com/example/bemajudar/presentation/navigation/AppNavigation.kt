@@ -37,6 +37,7 @@ import com.example.bemajudar.presentation.login.LoginScreen
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.example.bemajudar.presentation.volunteer.DonationsAreaVolunteerScreen
 import com.example.bemajudar.presentation.events.ManageEventsScreen
+import com.example.bemajudar.presentation.events.ManageVolunteerEventsScreen
 import com.example.bemajudar.presentation.volunteer.SocialAreaVolunteerScreen
 import com.example.bemajudar.presentation.volunteer.VolunteerMenu
 import com.example.bemajudar.presentation.volunteer.visitors.CreateVisitScreen
@@ -170,6 +171,11 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
             composable("manageEventsScreen") {
                 showBottomNav.value = true
                 ManageEventsScreen()
+            }
+
+            composable("manageVolunteerEventsScreen") { backStackEntry ->
+                val userEmail = backStackEntry.arguments?.getString("userEmail") ?: ""
+                ManageVolunteerEventsScreen(userEmail = userEmail)
             }
 
             composable("createVisitor") {
