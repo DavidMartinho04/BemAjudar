@@ -219,7 +219,7 @@ fun LoginScreen(
             modifier = Modifier
                 .width(180.dp)
                 .height(54.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF625BFF))
+            colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
         ) {
             Text(
                 text = "Iniciar Sessão",

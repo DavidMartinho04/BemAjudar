@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -27,6 +28,7 @@ import com.example.bemajudar.presentation.admin.VolunteerDetailScreen
 import com.example.bemajudar.presentation.admin.VolunteerManagementScreen
 import com.example.bemajudar.presentation.createaccount.CreateAccountScreen
 import com.example.bemajudar.presentation.createaccount.FinalizeAccountScreen
+import com.example.bemajudar.presentation.donations.DonationFormScreen
 import com.example.bemajudar.presentation.login.LoginScreen
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.example.bemajudar.presentation.volunteer.DonationsAreaVolunteerScreen
@@ -105,9 +107,9 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
             }
             composable("donationsAdmin") {
                 showBottomNav.value = true
-                DonationsAreaAdminScreen()
+                DonationsAreaAdminScreen(navController = navController)
             }
-            // Nova rota para Gerir Voluntários
+            // Gerir Voluntários
             composable("volunteerManagement") {
                 showBottomNav.value = true
                 VolunteerManagementScreen(navController = navController) // Chama o ecrã de gestão de voluntários
@@ -116,6 +118,13 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                 val volunteerId = backStackEntry.arguments?.getString("volunteerId") ?: ""
                 VolunteerDetailScreen(volunteerId = volunteerId)
             }
+
+            composable("registerDonation") {
+                val context = LocalContext.current
+                showBottomNav.value = true
+                DonationFormScreen(context = context)
+            }
+
             // Ecrãs do Voluntário
             composable("menuVolunteer") {
                 showBottomNav.value = true
