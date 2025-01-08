@@ -1,5 +1,6 @@
 package com.example.bemajudar.data.firebase
 
+import com.example.bemajudar.presentation.events.EventItem
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -166,5 +167,24 @@ fun updateNotificationState(notificationId: String, newState: String) {
         }
         .addOnFailureListener { e ->
             println("Erro ao atualizar notificação: ${e.message}")
+        }
+}
+
+fun fetchEvents(onEventsFetched: (List<EventItem>) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    db.collection("events").get()
+        .addOnSuccessListener { result ->
+            val events = result.map { document ->
+                EventItem(
+                    id = document.id,
+                    name = document.getString("name") ?: "Sem nome",
+                    description = document.getString("description") ?: "Sem descrição",
+                    date = document.getString("date") ?: "Sem data"
+                )
+            }
+            onEventsFetched(events)
+        }
+        .addOnFailureListener { exception ->
+            println("Erro ao buscar eventos: ${exception.message}")
         }
 }

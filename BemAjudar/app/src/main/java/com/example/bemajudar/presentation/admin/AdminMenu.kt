@@ -107,7 +107,7 @@ fun AdminMenu(
             Button(
                 onClick = { navController.navigate("createEvent") },
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6F6DF7)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF025997)),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Criar Evento", color = Color.White, fontSize = 14.sp)
@@ -116,7 +116,7 @@ fun AdminMenu(
             Button(
                 onClick = { /* Navegar para Doações */ },
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6F6DF7)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF025997)),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Nova Doação", color = Color.White, fontSize = 14.sp)
@@ -125,7 +125,7 @@ fun AdminMenu(
             Button(
                 onClick = { /* Navegar para Consultar Visitas */ },
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6F6DF7)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF025997)),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Consultar Visitas", color = Color.White, fontSize = 14.sp)
