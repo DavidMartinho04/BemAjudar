@@ -1,4 +1,4 @@
-package com.example.bemajudar.presentation.volunteer.visitors
+package com.example.bemajudar.presentation.visitors
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape

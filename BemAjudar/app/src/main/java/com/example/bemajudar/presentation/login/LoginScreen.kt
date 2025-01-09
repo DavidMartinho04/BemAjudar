@@ -42,9 +42,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bemajudar.R
-import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.example.bemajudar.data.AppDatabase
 import com.example.bemajudar.presentation.createaccount.hashPassword
+import com.example.bemajudar.presentation.viewmodels.UserViewModel
 import com.example.bemajudar.utils.isInternetAvailable
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -57,7 +57,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun LoginScreen(
     userViewModel: UserViewModel,
-    onLoginSuccess: (String, String) -> Unit, // Callback para navegação com base no tipo de utilizador
+    onLoginSuccess: (String) -> Unit, // Callback para navegação com base no tipo de utilizador
     onCreateAccountClick: () -> Unit // Callback para navegação ao ecrã de criação de conta
 ) {
     // Definições de cores para a interface
@@ -73,6 +73,7 @@ fun LoginScreen(
 
     // Inicializa Firebase Auth e Firestore
     val context = LocalContext.current
+    val roomDb = AppDatabase.getDatabase(context)
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
 
@@ -169,42 +170,52 @@ fun LoginScreen(
         Button(
             onClick = {
                 if (email.isNotEmpty() && password.isNotEmpty()) {
-                    auth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                val uid = auth.currentUser?.uid
-                                if (uid != null) {
-                                    // Verifica o tipo de utilizador no Firestore
-                                    db.collection("users").document(uid).get()
-                                        .addOnSuccessListener { document ->
-                                            if (document.exists()) {
-                                                val userType = document.getString("userType") ?: "Voluntário"
-                                                val userName = document.getString("name") ?: "Voluntário"
+                    val isConnected = isInternetAvailable(context)
 
-                                                userViewModel.name = userName
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val roomDb = AppDatabase.getDatabase(context)
+                        val auth = FirebaseAuth.getInstance()
+                        val db = FirebaseFirestore.getInstance()
 
-                                                onLoginSuccess(userType, email) // Navega com base no tipo de utilizador
-                                            } else {
-                                                Toast.makeText(
-                                                    context,
-                                                    "Utilizador não encontrado!",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                            }
-                                        }
-                                        .addOnFailureListener {
-                                            Toast.makeText(
-                                                context,
-                                                "Erro ao buscar utilizador: ${translateFirebaseError(it.message)}",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
+                        if (!isConnected) {
+                            // 🔒 Login OFFLINE usando a password inserida comparada com a hash no Room
+                            val localUser = roomDb.userDao().getUserByEmail(email)
+                            val hashedPassword = hashPassword(password)
+                            withContext(Dispatchers.Main) {
+                                if (localUser != null && localUser.authToken == hashedPassword) {
+                                    onLoginSuccess(localUser.userType)
+                                } else {
+                                    Toast.makeText(context, "Palavra-passe incorreta (offline).", Toast.LENGTH_SHORT).show()
                                 }
-                            } else {
-                                val errorMessage = translateFirebaseError(task.exception?.message)
-                                Toast.makeText(context, "Erro no login: $errorMessage", Toast.LENGTH_SHORT).show()
                             }
+                        } else {
+                            // 🔑 Login ONLINE usando Firebase Authentication
+                            auth.signInWithEmailAndPassword(email, password)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        val uid = auth.currentUser?.uid
+                                        if (uid != null) {
+                                            db.collection("users").document(uid).get()
+                                                .addOnSuccessListener { document ->
+                                                    if (document.exists()) {
+                                                        val userType = document.getString("userType") ?: "Voluntário"
+                                                        val userName = document.getString("name") ?: "Voluntário"
+                                                        userViewModel.name = userName
+                                                        onLoginSuccess(userType)
+                                                    } else {
+                                                        Toast.makeText(context, "Utilizador não encontrado (online).", Toast.LENGTH_SHORT).show()
+                                                    }
+                                                }
+                                                .addOnFailureListener {
+                                                    Toast.makeText(context, "Erro ao buscar utilizador no Firestore.", Toast.LENGTH_SHORT).show()
+                                                }
+                                        }
+                                    } else {
+                                        Toast.makeText(context, "Erro no login: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
                         }
+                    }
                 } else {
                     Toast.makeText(context, "Por favor, preencha todos os campos!", Toast.LENGTH_SHORT).show()
                 }
@@ -212,7 +223,7 @@ fun LoginScreen(
             modifier = Modifier
                 .width(180.dp)
                 .height(54.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF025997))
         ) {
             Text(
                 text = "Iniciar Sessão",

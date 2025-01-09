@@ -1,4 +1,4 @@
-package com.example.bemajudar.presentation.volunteer.visitors
+package com.example.bemajudar.presentation.visitors
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*

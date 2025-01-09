@@ -12,6 +12,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -31,27 +32,52 @@ import com.example.bemajudar.presentation.admin.VolunteerDetailScreen
 import com.example.bemajudar.presentation.admin.VolunteerManagementScreen
 import com.example.bemajudar.presentation.createaccount.CreateAccountScreen
 import com.example.bemajudar.presentation.createaccount.FinalizeAccountScreen
-import com.example.bemajudar.presentation.events.CreateEventScreen
-import com.example.bemajudar.presentation.events.NotificationsScreen
 import com.example.bemajudar.presentation.donations.DonationFormScreen
 import com.example.bemajudar.presentation.donations.items.DonationItemsListScreen
+import com.example.bemajudar.presentation.events.CreateEventScreen
+import com.example.bemajudar.presentation.events.ManageEventsScreen
+import com.example.bemajudar.presentation.events.NotificationsScreen
 import com.example.bemajudar.presentation.login.LoginScreen
 import com.example.bemajudar.presentation.pickups.LevantamentoFlowScreen
 import com.example.bemajudar.presentation.pickups.LevantamentoListScreen
 import com.example.bemajudar.presentation.viewmodels.UserViewModel
+import com.example.bemajudar.presentation.visitors.CreateVisitScreen
+import com.example.bemajudar.presentation.visitors.CreateVisitorScreen
+import com.example.bemajudar.presentation.visitors.ManageVisitorsScreen
+import com.example.bemajudar.presentation.visitors.ViewVisitorsScreen
 import com.example.bemajudar.presentation.volunteer.DonationsAreaVolunteerScreen
-import com.example.bemajudar.presentation.events.ManageEventsScreen
 import com.example.bemajudar.presentation.volunteer.SocialAreaVolunteerScreen
 import com.example.bemajudar.presentation.volunteer.VolunteerMenu
-import com.example.bemajudar.presentation.volunteer.visitors.CreateVisitScreen
-import com.example.bemajudar.presentation.volunteer.visitors.CreateVisitorScreen
-import com.example.bemajudar.presentation.volunteer.visitors.ManageVisitorsScreen
-import com.example.bemajudar.presentation.volunteer.visitors.ViewVisitorsScreen
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel) {
     val showBottomNav = remember { mutableStateOf(false) }
+    val auth = FirebaseAuth.getInstance()
+    val isLoggedIn = auth.currentUser != null
 
+    // ✅ Verificação de sessão no início da app
+    LaunchedEffect(Unit) {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            userViewModel.email = currentUser.email ?: ""
+            FirebaseFirestore.getInstance().collection("users").document(currentUser.uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    userViewModel.userType = document.getString("userType") ?: "Voluntário"
+                    userViewModel.name = document.getString("name") ?: "Utilizador Desconhecido"
+
+                    // Navegação com base no tipo de utilizador
+                    navController.navigate(if (userViewModel.userType == "Gestor") "menuAdmin" else "menuVolunteer") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                    showBottomNav.value = true
+                }
+        }
+    }
+
+    // ✅ Configuração da Scaffold e Bottom Navigation
     Scaffold(
         bottomBar = {
             if (showBottomNav.value) {
@@ -61,19 +87,18 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "login",
-
+            startDestination = if (isLoggedIn) "menuAdmin" else "login",  // Garantir autenticação
             modifier = Modifier.padding(innerPadding)
         ) {
             // Ecrã de Login
             composable("login") {
                 showBottomNav.value = false
                 LoginScreen(
-
-                    onLoginSuccess = { userType, userEmail ->
+                    onLoginSuccess = { userType ->
+                        // Define o tipo de utilizador no UserViewModel
                         userViewModel.userType = userType
-                        userViewModel.email = userEmail
 
+                        // Navega para o menu correto com base no tipo de utilizador
                         if (userType == "Gestor") {
                             navController.navigate("menuAdmin")
                         } else {
@@ -188,7 +213,6 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                 showBottomNav.value = true
                 ManageEventsScreen()
             }
-
 
             composable("createVisitor") {
                 showBottomNav.value = true

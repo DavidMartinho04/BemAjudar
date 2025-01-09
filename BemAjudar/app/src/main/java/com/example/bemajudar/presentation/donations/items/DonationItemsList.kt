@@ -101,22 +101,24 @@ fun DonationItemsListScreen() {
                 DonationItemDetailCard(
                     item = item,
                     onEdit = { updatedItem ->
-                        db.collection("donations").whereArrayContains("items", item).get()
+                        // Corrigido para procurar o documento certo
+                        db.collection("donations").get()
                             .addOnSuccessListener { documents ->
-                                for (document in documents) {
-                                    val updatedItems = (document.get("items") as? List<Map<String, Any>>)
-                                        ?.map { original ->
-                                            if (original["name"] == item.name) {
-                                                mapOf(
-                                                    "name" to updatedItem.name,
-                                                    "description" to updatedItem.description,
-                                                    "quantity" to updatedItem.quantity,
-                                                    "type" to updatedItem.type,
-                                                    "photoUrl" to updatedItem.photoUri
-                                                )
-                                            } else original
-                                        } ?: listOf()
+                                documents.forEach { document ->
+                                    val items = document.get("items") as? List<Map<String, Any>> ?: emptyList()
+                                    val updatedItems = items.map { original ->
+                                        if (original["name"] == item.name) { // Comparar pelo nome
+                                            mapOf(
+                                                "name" to updatedItem.name,
+                                                "description" to updatedItem.description,
+                                                "quantity" to updatedItem.quantity,
+                                                "type" to updatedItem.type,
+                                                "photoUrl" to updatedItem.photoUri
+                                            )
+                                        } else original
+                                    }
 
+                                    // Atualizar apenas os itens no documento correto
                                     db.collection("donations").document(document.id)
                                         .update("items", updatedItems)
                                 }

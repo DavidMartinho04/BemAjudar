@@ -49,7 +49,7 @@ fun DonationsAreaVolunteerScreen(navController: NavHostController) {
             Button(
                 onClick = {
                     when (title) {
-                        "Registar Levantamento" -> navController.navigate("levantamentos")
+                        "Registar Levantamento" -> navController.navigate("levantamento")
                         "Gerir Doações" -> navController.navigate("listDonations")
                         "Gerir Itens" -> navController.navigate("listItems")
                         "Consultar Levantamentos" -> navController.navigate("levantamentos")

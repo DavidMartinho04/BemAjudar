@@ -54,6 +54,10 @@ class UserViewModel : ViewModel() {
         volunteers.add(Volunteer(name, email, id))
     }
 
+    fun updateEmail(newEmail: String) {
+        email = newEmail
+    }
+
     data class Volunteer(
         val name: String, // Nome do utilizador
         val email: String, // Endereço de email
